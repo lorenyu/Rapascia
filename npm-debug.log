@@ -1,0 +1,25 @@
+info it worked if it ends with ok
+verbose cli [ '/home/cloud9/c9/support/node-c9-builds-v4/node-c9-sunos',
+verbose cli   '/home/ide_lorenyu/workspaces/npm/bin/npm.js',
+verbose cli   'install',
+verbose cli   '-d' ]
+info using npm@1.0.1rc6
+info using node@v0.4.5
+verbose config file /home/cloud9/.npmrc
+verbose config file /home/cloud9/c9/support/etc/npmrc
+ERR! Couldn't read dependencies.
+ERR! { stack: [Getter/Setter],
+ERR!   arguments: undefined,
+ERR!   type: undefined,
+ERR!   message: 'ENOENT, No such file or directory \'/mnt/ws/users/lorenyu/47122/package.json\'',
+ERR!   errno: 2,
+ERR!   code: 'ENOENT',
+ERR!   path: '/mnt/ws/users/lorenyu/47122/package.json' }
+ERR! Report this *entire* log at:
+ERR!     <http://github.com/isaacs/npm/issues>
+ERR! or email it to:
+ERR!     <npm-@googlegroups.com>
+ERR! 
+ERR! System SunOS 5.11
+ERR! command "/home/cloud9/c9/support/node-c9-builds-v4/node-c9-sunos" "/home/ide_lorenyu/workspaces/npm/bin/npm.js" "install" "-d"
+verbose exit [ 2, true ]
