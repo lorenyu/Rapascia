@@ -19,7 +19,7 @@ var app = express.createServer();
 
 app.get('/', function(req, res, next){
     res.send('hello, world');
-    next();
+    return next();
 });
 
 app.get('/static/game/:filename', function(req, res, next){
@@ -33,13 +33,13 @@ app.get('/static/game/:filename', function(req, res, next){
             if (exists) {
                 res.sendfile(filepath);
             } else {
-                next();
+                return next();
             }
         });
     }
 });
 
-app.use(express.static(__dirname + '/static'));
+app.use(express.static(__dirname + '/static/'));
 
 app.listen(PORT, HOST);
 
