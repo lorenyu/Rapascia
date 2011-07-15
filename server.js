@@ -2,10 +2,18 @@ var util = require('util'),
     http = require('http'),
     path = require('path'),
     io = require('socket.io'),
+    express = require('express'),
+    jade = require('jade'),
+    placeholder = require('placeholder'),
     server,
     socket,
     PORT = process.env.C9_PORT,
     HOST = '0.0.0.0';
+
+placeholder.install({
+    express: express,
+    jade: jade
+});
 
 var log = util.puts;
 
@@ -13,15 +21,12 @@ var log = util.puts;
 var serverDir = path.dirname(process.argv[1]);
 process.chdir(serverDir);
 
-var express = require('express');
-
 var app = express.createServer();
 
 app.set('view engine', 'jade');
 
 app.get('/', function(req, res, next){
-    //res.render('index');
-    res.sendfile('public/index.html');
+    res.render('index');
 });
 
 app.get('/game', function(req, res, next){
