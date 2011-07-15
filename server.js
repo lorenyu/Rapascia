@@ -17,6 +17,8 @@ var express = require('express');
 
 var app = express.createServer();
 
+app.set('view engine', 'jade');
+
 app.get('/', function(req, res, next){
     res.render('index');
 });
