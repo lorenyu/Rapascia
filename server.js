@@ -20,7 +20,8 @@ var app = express.createServer();
 app.set('view engine', 'jade');
 
 app.get('/', function(req, res, next){
-    res.render('index');
+    //res.render('index');
+    res.sendfile('public/index.html');
 });
 
 app.get('/game', function(req, res, next){
