@@ -18,8 +18,11 @@ var express = require('express');
 var app = express.createServer();
 
 app.get('/', function(req, res, next){
-    res.send('hello, world');
-    return next();
+    res.render('index');
+});
+
+app.get('/game', function(req, res, next){
+    res.render('game');
 });
 
 app.get('/static/game/:filename', function(req, res, next){
