@@ -6,10 +6,11 @@ var Player = module.exports = function() {
     
     this.joinGame = function(game) {
         this.game = game;
+        this.game.addPlayer(this);
         this.emit('message', {
             type: 'joinGame',
             player: this,
-            game: thisgame
+            game: this.game
         });
         return true;
     };
@@ -18,7 +19,6 @@ var Player = module.exports = function() {
         if (!this.game) {
             return false;
         }
-        //TODO: function needs to be created
         this.game.removePlayer(this);
         this.emit('message', {
             type: 'leaveGame',
