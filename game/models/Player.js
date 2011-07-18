@@ -1,4 +1,5 @@
 var Player = module.exports = function() {
+    process.EventEmitter.call(this);
     this.id = Math.random();
     this.name = 'Player'+this.id;
     this.game = null;
@@ -8,7 +9,7 @@ var Player = module.exports = function() {
         this.emit('message', {
             type: 'joinGame',
             player: this,
-            game: this.game
+            game: thisgame
         });
         return true;
     };
