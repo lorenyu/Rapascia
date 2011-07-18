@@ -1,6 +1,23 @@
 #{placeholder.define('title', 'Rapascia')}
 #{placeholder.define('subtitle', 'Online real-time/turn-based hybrid strategy board game')}
+
 placeholder(define='script'):
     script
-        alert('Hello, Rapascia');
+        $(document).ready(function() {
+            var socket = io.connect('/rapascia/');
+            
+            socket.on('game-created', function(gameid) {
+                console.log(gameid);
+                window.location = '/game/' + gameid;
+            });
+
+            $('.btn[action]').click(function(event) {
+                socket.emit($(this).attr('action'));
+            });
+        });
+
 | Hello, Rapascia.
+button.btn(action="create-game") Create Game
+ul.games
+    - each game in games
+        li= 'Game ' + game.id

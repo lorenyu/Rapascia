@@ -7,6 +7,7 @@ var util = require('util'),
     placeholder = require('placeholder'),
     server,
     socket,
+    Game = require('./game/models/Game.js'),
     PORT = process.env.C9_PORT,
     HOST = '0.0.0.0';
 
@@ -23,14 +24,55 @@ process.chdir(serverDir);
 
 var app = express.createServer();
 
+
+
+// globals
+var gamesById = {};
+
+
+
+// helpers
+function loadGame(req, res, next) {
+    // You would fetch your user from the db
+    var game = gamesById[req.params.gameid];
+    if (game) {
+        req.game = game;
+        next();
+    } else {
+        next(new Error('Failed to load game ' + req.params.gameid));
+    }
+}
+
+
 app.set('view engine', 'jade');
 
 app.get('/', function(req, res, next){
-    res.render('index');
+    var games = [],
+        socket = io.of('/rapascia/');
+    socket.on('connection', function(client) {
+        client.on('create-game', function() {
+            console.log('create game msg received');
+            var game = new Game();
+            gamesById[game.id] = game;
+            client.emit('game-created', game.id);
+        });
+    });
+    for (var id in gamesById) {
+        games.push(gamesById[id]);
+    }
+    res.render('index', {
+        games: games
+    });
 });
 
 app.get('/game', function(req, res, next){
     res.render('game');
+});
+
+app.get('/game/:gameid', loadGame, function(req, res, next){
+    res.render('game', {
+        game: req.game
+    });
 });
 
 app.get('/static/game/:filename', function(req, res, next){
@@ -50,9 +92,13 @@ app.get('/static/game/:filename', function(req, res, next){
     }
 });
 
-app.use(express.static(__dirname + '/static/'));
+app.use(express['static'](__dirname + '/public/'));
 
 app.listen(PORT, HOST);
+
+io = io.listen(app, {
+    transports: ['flashsocket', 'htmlfile', 'xhr-multipart', 'xhr-polling', 'jsonp-polling']
+});
 
 /*
 server = http.createServer(function(req, res){
