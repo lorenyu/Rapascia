@@ -7,19 +7,25 @@ placeholder(define='script'):
             var socket = io.connect('/rapascia' + window.location.pathname);
             
             var jade = require('jade');
-            var playerRenderer = jade.compile('li.player= this.name');
+            var playerRenderer = jade.compile('li.player(name=this.name)= this.name');
 
             socket.on('player-joined', function(player) {
-                console.log(player);
+                console.log(player.name + ' joined');
                 $('.players').append(playerRenderer.call(player));
+            });
+            socket.on('player-left', function(player) {
+                console.log(player.name + ' left');
+                $('li.player[name=' + player.name + ']').remove();
             });
 
             $('.btn[action]').click(function(event) {
                 socket.emit($(this).attr('action'));
             });
+            $(window).unload(function() {
+            });
         });
 
 ul.players
     - each player in game.players
-        li.player= player.name
+        li.player(name=player.name)= player.name
         

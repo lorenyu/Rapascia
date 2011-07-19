@@ -78,6 +78,11 @@ app.get('/game/:gameid', loadGame, function(req, res, next){
         client.broadcast.emit('player-joined', {
             name : player.name
         });
+        client.once('disconnect', function () {
+            client.broadcast.emit('player-left', {
+                name : player.name
+            });
+        });
     });
     res.render('game', {
         player: {
