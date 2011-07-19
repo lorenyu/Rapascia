@@ -1,3 +1,5 @@
+var util = require('util');
+
 var Player = module.exports = function() {
     process.EventEmitter.call(this);
     this.id = Math.random();
@@ -30,3 +32,5 @@ var Player = module.exports = function() {
         return true;
     };
 };
+
+util.inherits(Player, process.EventEmitter);
