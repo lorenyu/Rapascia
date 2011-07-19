@@ -3,4 +3,23 @@
 
 placeholder(define='script'):
     script
+        $(document).ready(function() {
+            var socket = io.connect('/rapascia' + window.location.pathname);
+            
+            var jade = require('jade');
+            var playerRenderer = jade.compile('li.player= this.name');
+
+            socket.on('player-joined', function(player) {
+                console.log(player);
+                $('.players').append(playerRenderer.call(player));
+            });
+
+            $('.btn[action]').click(function(event) {
+                socket.emit($(this).attr('action'));
+            });
+        });
+
+ul.players
+    - each player in game.players
+        li.player= player.name
         

@@ -8,6 +8,7 @@ var util = require('util'),
     server,
     socket,
     Game = require('./game/models/Game.js'),
+    Player = require('./game/models/Player.js'),
     PORT = process.env.C9_PORT,
     HOST = '0.0.0.0';
 
@@ -70,7 +71,19 @@ app.get('/game', function(req, res, next){
 });
 
 app.get('/game/:gameid', loadGame, function(req, res, next){
+    var socket = io.of('/rapascia' + req.url),
+        player = new Player();
+    player.joinGame(req.game);
+    socket.once('connection', function(client) {
+        client.broadcast.emit('player-joined', {
+            name : player.name
+        });
+    });
     res.render('game', {
+        player: {
+            id: player.id,
+            name: player.name
+        },
         game: req.game
     });
 });
