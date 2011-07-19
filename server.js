@@ -50,12 +50,13 @@ app.set('view engine', 'jade');
 app.get('/', function(req, res, next){
     var games = [],
         socket = io.of('/rapascia/');
-    socket.on('connection', function(client) {
-        client.on('create-game', function() {
+    socket.once('connection', function(client) {
+        client.once('create-game', function() {
             console.log('create game msg received');
             var game = new Game();
             gamesById[game.id] = game;
-            client.emit('game-created', game.id);
+            client.broadcast.emit('game-created', game.id);
+            client.emit('redirect-to-game', game.id);
         });
     });
     for (var id in gamesById) {

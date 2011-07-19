@@ -5,10 +5,17 @@ placeholder(define='script'):
     script
         $(document).ready(function() {
             var socket = io.connect('/rapascia/');
+
+            var jade = require('jade');
+            var gameRenderer = jade.compile("li\\n" +
+                                            "    a(href='/game/' + this.id)= 'Game ' + this.id");
             
-            socket.on('game-created', function(gameid) {
+            socket.on('redirect-to-game', function(gameid) {
                 console.log(gameid);
                 window.location = '/game/' + gameid;
+            });
+            socket.on('game-created', function(gameid) {
+                $('.games').append(gameRenderer.call({ id: gameid }));
             });
 
             $('.btn[action]').click(function(event) {
@@ -20,4 +27,5 @@ placeholder(define='script'):
 button.btn(action="create-game") Create Game
 ul.games
     - each game in games
-        li= 'Game ' + game.id
+        li
+            a(href='/game/' + game.id)= 'Game ' + game.id
