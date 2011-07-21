@@ -102,8 +102,11 @@ socket.on('connection', function(client) {
                 name: player.name
             });
             playerClient.on('start-game', function() {
-                var gameServer = new GameServer(gameSocket);
-                gameServer.start();
+                if (!game.timeStarted) {
+                    game.timeStarted = new Date().getTime();
+                    var gameServer = new GameServer(gameSocket);
+                    gameServer.start();
+                }
             });
             playerClient.once('disconnect', function() {
                 playerClient.broadcast.emit('player-left', {
