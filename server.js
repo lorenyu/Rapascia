@@ -103,8 +103,7 @@ socket.on('connection', function(client) {
             });
             playerClient.on('start-game', function() {
                 if (!game.timeStarted) {
-                    game.timeStarted = new Date().getTime();
-                    var gameServer = new GameServer(gameSocket);
+                    var gameServer = new GameServer(game, gameSocket);
                     gameServer.start();
                 }
             });

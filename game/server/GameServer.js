@@ -1,7 +1,8 @@
 var _ = require('underscore'),
     GameTime = require('../GameTime.js');
 
-var GameServer = module.exports = function(socket) {
+var GameServer = module.exports = function(game, socket) {
+    this.game = game;
     this.socket = socket;
     this.time = new GameTime();
     this.tickTime = 1000.0 / 3.0; // approx. time between ticks
@@ -9,6 +10,8 @@ var GameServer = module.exports = function(socket) {
 
 // start game loop
 GameServer.prototype.start = function() {
+    this.game.timeStarted = new Date().getTime();
+    
     this.tick = _.bind(this.tick, this);
     // I'm not sure how efficient the above closure is. Perhaps it would be better to have a universal game loop that iterates through all live games and calls their tick method.
     // static GameServer.tick function():
