@@ -17,6 +17,9 @@ placeholder(define='script'):
                 console.log(player.name + ' left');
                 $('li.player[name=' + player.name + ']').remove();
             });
+            socket.on('time-updated', function(millis) {
+                $('.time').text(millis);
+            });
 
             $('.btn[action]').click(function(event) {
                 socket.emit($(this).attr('action'));
@@ -25,7 +28,13 @@ placeholder(define='script'):
             });
         });
 
-ul.players
-    - each player in game.players
-        li.player(name=player.name)= player.name
+section
+    button.btn(action="start-game") Start Game
+section
+    h3 Server Time
+    .time
+section
+    ul.players
+        - each player in game.players
+            li.player(name=player.name)= player.name
         

@@ -9,6 +9,7 @@ var util = require('util'),
     socket,
     Game = require('./game/models/Game.js'),
     Player = require('./game/models/Player.js'),
+    GameServer = require('./game/server/GameServer.js'),
     PORT = process.env.C9_PORT,
     HOST = '0.0.0.0';
 
@@ -84,9 +85,7 @@ app.use(express['static'](__dirname + '/public/'));
 
 app.listen(PORT, HOST);
 
-io = io.listen(app, {
-    transports: ['flashsocket', 'htmlfile', 'xhr-multipart', 'xhr-polling', 'jsonp-polling']
-});
+io = io.listen(app);
 
 var socket = io.of('/rapascia/');
 socket.on('connection', function(client) {
@@ -101,6 +100,10 @@ socket.on('connection', function(client) {
             player.joinGame(game);
             gameSocket.emit('player-joined', {
                 name: player.name
+            });
+            playerClient.on('start-game', function() {
+                var gameServer = new GameServer(gameSocket);
+                gameServer.start();
             });
             playerClient.once('disconnect', function() {
                 playerClient.broadcast.emit('player-left', {

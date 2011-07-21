@@ -26,6 +26,6 @@ placeholder(define='script'):
 | Hello, Rapascia.
 button.btn(action="create-game") Create Game
 ul.games
-    - each game in games
+    - each game, id in gamesById
         li
-            a(href='/game/' + game.id)= 'Game ' + game.id
+            a(href='/game/' + id)= 'Game ' + id
