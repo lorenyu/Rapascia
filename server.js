@@ -50,15 +50,6 @@ app.set('view engine', 'jade');
 app.get('/', function(req, res, next){
     var games = [],
         socket = io.of('/rapascia/');
-    socket.once('connection', function(client) {
-        client.once('create-game', function() {
-            console.log('create game msg received');
-            var game = new Game();
-            gamesById[game.id] = game;
-            client.broadcast.emit('game-created', game.id);
-            client.emit('redirect-to-game', game.id);
-        });
-    });
     for (var id in gamesById) {
         games.push(gamesById[id]);
     }
@@ -72,24 +63,7 @@ app.get('/game', function(req, res, next){
 });
 
 app.get('/game/:gameid', loadGame, function(req, res, next){
-    var socket = io.of('/rapascia' + req.url),
-        player = new Player();
-    player.joinGame(req.game);
-    socket.once('connection', function(client) {
-        client.broadcast.emit('player-joined', {
-            name : player.name
-        });
-        client.once('disconnect', function () {
-            client.broadcast.emit('player-left', {
-                name : player.name
-            });
-        });
-    });
     res.render('game', {
-        player: {
-            id: player.id,
-            name: player.name
-        },
         game: req.game
     });
 });
@@ -117,6 +91,32 @@ app.listen(PORT, HOST);
 
 io = io.listen(app, {
     transports: ['flashsocket', 'htmlfile', 'xhr-multipart', 'xhr-polling', 'jsonp-polling']
+});
+
+var socket = io.of('/rapascia/');
+socket.on('connection', function(client) {
+    client.once('create-game', function() {
+        console.log('create game msg received');
+        var game = new Game();
+        gamesById[game.id] = game;
+        
+        var gameSocket = io.of('/rapascia/game/' + game.id);
+        gameSocket.on('connection', function(playerClient) {
+            var player = new Player();
+            player.joinGame(game);
+            gameSocket.emit('player-joined', {
+                name: player.name
+            });
+            playerClient.once('disconnect', function() {
+                playerClient.broadcast.emit('player-left', {
+                    name: player.name
+                });
+            });
+        });
+        
+        client.broadcast.emit('game-created', game.id);
+        client.emit('redirect-to-game', game.id);
+    });
 });
 
 /*
