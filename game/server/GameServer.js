@@ -9,11 +9,12 @@ var GameServer = module.exports = function(socket) {
 
 // start game loop
 GameServer.prototype.start = function() {
+    this.tick = _.bind(this.tick, this);
     this.tick();
 };
 
 GameServer.prototype.tick = function() {
     this.time.update();
     this.socket.emit('time-updated', this.time.millis);
-    setTimeout(_.bind(this.tick, this), this.tickTime);
+    setTimeout(this.tick, this.tickTime);
 };
