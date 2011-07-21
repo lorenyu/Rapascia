@@ -48,13 +48,8 @@ function loadGame(req, res, next) {
 app.set('view engine', 'jade');
 
 app.get('/', function(req, res, next){
-    var games = [],
-        socket = io.of('/rapascia/');
-    for (var id in gamesById) {
-        games.push(gamesById[id]);
-    }
     res.render('index', {
-        games: games
+        gamesById: gamesById
     });
 });
 
