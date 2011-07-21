@@ -10,6 +10,13 @@ var GameServer = module.exports = function(socket) {
 // start game loop
 GameServer.prototype.start = function() {
     this.tick = _.bind(this.tick, this);
+    // I'm not sure how efficient the above closure is. Perhaps it would be better to have a universal game loop that iterates through all live games and calls their tick method.
+    // static GameServer.tick function():
+    //     for game in games_that_started:
+    //         game.tick()
+    //     setTimeout(GameServer.tick, tickTime)
+    
+    
     this.tick();
 };
 
