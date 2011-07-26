@@ -8,6 +8,9 @@ placeholder(define='script'):
             
             var jade = require('jade');
             var playerRenderer = jade.compile('li.player(name=this.name)= this.name');
+            var commandRenderer = jade.compile('li.command= this');
+
+            window.gameClient = new Rapascia.GameClient(socket);
 
             socket.on('player-joined', function(player) {
                 console.log(player.name + ' joined');
@@ -17,8 +20,11 @@ placeholder(define='script'):
                 console.log(player.name + ' left');
                 $('li.player[name=' + player.name + ']').remove();
             });
-            socket.on('time-updated', function(millis) {
-                $('.time').text(millis);
+            socket.on('tick', function(data) {
+                $('.time').text(data.time);
+                $.each(data.commands, function(i, command) {
+                    $('.commands').append(commandRenderer.call(command));
+                });
             });
 
             $('.btn[action]').click(function(event) {
@@ -37,4 +43,6 @@ section
     ul.players
         - each player in game.players
             li.player(name=player.name)= player.name
+section
+    ul.commands
 canvas(data-processing-sources="/processing/game.pde")
