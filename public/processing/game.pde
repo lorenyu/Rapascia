@@ -6,7 +6,7 @@ int delay = 16;
   
 // Setup the Processing Canvas  
 void setup(){  
-  size( 200, 200 );  
+  size( screen.width, screen.height );  
   strokeWeight( 10 );  
   frameRate( 15 );  
   X = width / 2;  
@@ -42,4 +42,8 @@ void draw(){
 void mouseMoved(){  
   nX = mouseX;  
   nY = mouseY;    
+}
+
+void mousePressed() {
+    gameClient.sendCommand({ mouseX, mouseY });
 }
