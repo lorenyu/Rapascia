@@ -8,7 +8,6 @@ var util = require('util'),
     server,
     socket,
     Game = require('./game/models/Game.js'),
-    Player = require('./game/models/Player.js'),
     GameServer = require('./game/server/GameServer.js'),
     PORT = process.env.C9_PORT,
     HOST = '0.0.0.0';
@@ -86,6 +85,7 @@ app.use(express['static'](__dirname + '/public/'));
 app.listen(PORT, HOST);
 
 io = io.listen(app);
+io.set('log level', 1);
 
 var socket = io.of('/rapascia/');
 socket.on('connection', function(client) {
@@ -95,24 +95,7 @@ socket.on('connection', function(client) {
         gamesById[game.id] = game;
         
         var gameSocket = io.of('/rapascia/game/' + game.id);
-        gameSocket.on('connection', function(playerClient) {
-            var player = new Player();
-            player.joinGame(game);
-            gameSocket.emit('player-joined', {
-                name: player.name
-            });
-            playerClient.on('start-game', function() {
-                if (!game.timeStarted) {
-                    var gameServer = new GameServer(game, gameSocket);
-                    gameServer.start();
-                }
-            });
-            playerClient.once('disconnect', function() {
-                playerClient.broadcast.emit('player-left', {
-                    name: player.name
-                });
-            });
-        });
+        var gameServer = new GameServer(game, gameSocket);
         
         client.broadcast.emit('game-created', game.id);
         client.emit('redirect-to-game', game.id);
