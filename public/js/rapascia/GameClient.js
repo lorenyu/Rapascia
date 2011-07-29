@@ -12,19 +12,11 @@ Rapascia.models = {};
  * Game Model
  */
 var Game = Rapascia.models.Game = function() {
-    this._tiles = [];
     this._players = [];
-    this._units = [];
     this._map = new Map();
-};
-Game.prototype.tiles = function() {
-    return this._tiles;
 };
 Game.prototype.players = function() {
     return this._players;
-};
-Game.prototype.units = function() {
-    return this._units;
 };
 Game.prototype.map = function() {
     return this._map;
@@ -122,9 +114,10 @@ var Player = Rapascia.models.Player = function() {
  
 var jade = require('jade');
 
-var gameRenderer = null;
+Rapascia.renderers = {};
+
 $.get('/jade/game.jade', function(data) {
-    gameRenderer = jade.compile(data);
+    Rapascia.renderers.gameRenderer = jade.compile(data);
 });
 
 /**************
@@ -149,6 +142,10 @@ GameClient.prototype.tick = function(data) {
     // process player commands
     
     // update game state
+    
+    // render
+    console.log(Rapascia.renderers.gameRenderer.call(this.game));
+    $('.game').html(Rapascia.renderers.gameRenderer.call(this.game));
     
     this.time = time;
 };
