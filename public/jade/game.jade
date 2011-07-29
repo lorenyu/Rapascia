@@ -1,4 +1,4 @@
 - each row in this.map().tiles()
     tr
         - each tile in row
-            td(player=tile.player())= tile.units().length
+            td.tile(player=tile.player())= tile.units().length

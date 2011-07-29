@@ -80,6 +80,7 @@ app.get('/static/game/:filename', function(req, res, next){
     }
 });
 
+app.use(express.compiler({ src: __dirname + '/public', enable: ['less'] }));
 app.use(express['static'](__dirname + '/public/'));
 
 app.listen(PORT, HOST);
