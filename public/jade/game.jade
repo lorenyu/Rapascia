@@ -1,4 +1,7 @@
 - each row in this.map().tiles()
     tr
         - each tile in row
-            td.tile(player=tile.player())= tile.units().length
+            - if (tile.player())
+                td.tile(player=tile.player().color())= tile.units().length
+            - else
+                td.tile

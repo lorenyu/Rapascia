@@ -12,6 +12,13 @@ var GameServer = module.exports = function(game, socket) {
     var self = this;
     socket.on('connection', function(playerClient) {
         var player = new Player();
+        
+        _.each(game.players, function(player) {
+            playerClient.emit('player-joined', {
+                name: player.name
+            });
+        });
+        
         player.joinGame(game);
         socket.emit('player-joined', {
             name: player.name

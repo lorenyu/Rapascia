@@ -1,3 +1,28 @@
 .game .tile {
+  border: solid 1px;
   padding: 6px;
+}
+.game .tile[player=red] {
+  background-color: #e8c0c0;
+  border-color: #e8c0c0;
+}
+.game .tile[player=green] {
+  background-color: #c0e8c0;
+  border-color: #c0e8c0;
+}
+.game .tile[player=blue] {
+  background-color: #c0c0e8;
+  border-color: #c0c0e8;
+}
+.game .tile[player=orange] {
+  background-color: #e8e824;
+  border-color: #e8e824;
+}
+.game .tile[player=magenta] {
+  background-color: #e8c0e8;
+  border-color: #e8c0e8;
+}
+.game .tile[player=cyan] {
+  background-color: #c0e8e8;
+  border-color: #c0e8e8;
 }

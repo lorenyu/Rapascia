@@ -21,6 +21,23 @@ Game.prototype.players = function() {
 Game.prototype.map = function() {
     return this._map;
 };
+Game.prototype.addPlayer = function(player) {
+    this.players().push(player);
+    switch (player.index()) {
+        case 1:
+            this.map().tiles()[0][0].units().push(new Unit(player));
+            break;
+        case 2:
+            this.map().tiles()[11][11].units().push(new Unit(player));
+            break;
+        case 3:
+            this.map().tiles()[0][11].units().push(new Unit(player));
+            break;
+        case 4:
+            this.map().tiles()[11][0].units().push(new Unit(player));
+            break;
+    }
+};
 
 /**
  * Map Model
@@ -106,6 +123,28 @@ Unit.prototype.isTransitioning = function() {
  * Player Model
  */
 var Player = Rapascia.models.Player = function() {
+    this._index = Player.nextIndex();
+};
+Player.nextIndex = (function() {
+    var index = 1;
+    return function() {
+        index += 1;
+        return index - 1;
+    };
+})();
+Player.prototype.index = function() {
+    return this._index;
+};
+Player.prototype.color = function() {
+    switch (this._index) {
+    case 1: return 'red';
+    case 2: return 'blue';
+    case 3: return 'green';
+    case 4: return 'magenta';
+    case 5: return 'orange';
+    case 6: return 'cyan';
+    }
+    return 'gray';
 };
 
 /*************
@@ -120,15 +159,26 @@ $.get('/jade/game.jade', function(data) {
     Rapascia.renderers.gameRenderer = jade.compile(data);
 });
 
+Rapascia.renderers.playerRenderer = jade.compile('li.player(name=this.name)= this.name');
+
 /**************
  * GameClient *
  **************/
 var GameClient = Rapascia.GameClient = function(socket) {
     
     this.game = new Rapascia.models.Game();
-    
     this.socket = socket;
+    
     socket.on('tick', $.proxy(this.tick, this));
+    socket.on('player-joined', $.proxy(function(playerData) {
+        $('.players').append(Rapascia.renderers.playerRenderer.call(playerData)); // temporary for debugging
+        
+        this.game.addPlayer(new Player(playerData));
+        
+    }, this));
+    socket.on('player-left', $.proxy(function(player) {
+        $('li.player[name=' + player.name + ']').remove(); // temporary
+    }, this));
 };
 GameClient.prototype.tick = function(data) {
     $('.time').text(data.time); // for debugging

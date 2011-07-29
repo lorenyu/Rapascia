@@ -1,5 +1,18 @@
+@red: #e8c0c0;
+@green: #c0e8c0;
+@blue: #c0c0e8;
+@orange: #e8e824;
+@magenta: #e8c0e8;
+@cyan: #c0e8e8;
+
 .game {
     .tile {
-        padding: 6px;
+        border: solid 1px; padding: 6px;
+        &[player=red] { background-color: @red; border-color: @red; }
+        &[player=green] { background-color: @green; border-color: @green;}
+        &[player=blue] { background-color: @blue; border-color: @blue;}
+        &[player=orange] { background-color: @orange; border-color: @orange;}
+        &[player=magenta] { background-color: @magenta; border-color: @magenta;}
+        &[player=cyan] { background-color: @cyan; border-color: @cyan;}
     }
 }
