@@ -2,19 +2,20 @@
     
 var Rapascia = window.Rapascia = {};
 
-/**********************
- * Define Game Models *
- **********************/
+/***************
+ * Game Models *
+ ***************/
 
 Rapascia.models = {};
 
-/**************
- * Game Model *
- **************/
+/**
+ * Game Model
+ */
 var Game = Rapascia.models.Game = function() {
     this._tiles = [];
     this._players = [];
     this._units = [];
+    this._map = new Map();
 };
 Game.prototype.tiles = function() {
     return this._tiles;
@@ -25,11 +26,43 @@ Game.prototype.players = function() {
 Game.prototype.units = function() {
     return this._units;
 };
+Game.prototype.map = function() {
+    return this._map;
+};
 
-/**************
- * Tile Model *
- **************/
-var Tile = Rapascia.models.Tile = function() {
+/**
+ * Map Model
+ */
+var Map = Rapascia.models.Map = function() {
+
+    // hardcode map for now
+    var numRows = 12,
+        numCols = 12,
+        tiles = [], tile,
+        i,
+        j;
+    for (i = 0; i < numRows; i += 1) {
+        tiles.push([]);
+        for (j = 0; j < numCols; j += 1) {
+            tile = new Tile(numCols*i + numCols);
+            tile.index = numCols*i + numCols;
+            tile.i = i;
+            tile.j = j;
+            tiles[i].push(tile);
+        }
+    }
+
+    this._tiles = tiles;
+};
+Map.prototype.tiles = function() {
+    return this._tiles;
+};
+
+/**
+ * Tile Model
+ */
+var Tile = Rapascia.models.Tile = function(id) {
+    this._id = id;
     this._units = [];
 };
 Tile.prototype.units = function() {
@@ -42,9 +75,9 @@ Tile.prototype.player = function() {
     return null;
 };
 
-/**************
- * Unit Model *
- **************/
+/**
+ * Unit Model
+ */
 var Unit = Rapascia.models.Unit = function(player) {
     this._player = player;
     this._mode = 'stopped';
@@ -77,16 +110,30 @@ Unit.prototype.isTransitioning = function() {
     return this._cooldown > 0;
 };
 
-/****************
- * Player Model *
- ****************/
+/**
+ * Player Model
+ */
 var Player = Rapascia.models.Player = function() {
 };
 
-/***********************
- * Defining GameClient *
- ***********************/
+/*************
+ * Renderers *
+ *************/
+ 
+var jade = require('jade');
+
+var gameRenderer = null;
+$.get('/jade/game.jade', function(data) {
+    gameRenderer = jade.compile(data);
+});
+
+/**************
+ * GameClient *
+ **************/
 var GameClient = Rapascia.GameClient = function(socket) {
+    
+    this.game = new Rapascia.models.Game();
+    
     this.socket = socket;
     socket.on('tick', $.proxy(this.tick, this));
 };
