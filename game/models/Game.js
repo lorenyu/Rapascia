@@ -5,8 +5,6 @@ var Game = module.exports = function() {
     this.timeStarted = null;
     this.players = [];
     
-    this.map = new Map();
-    
     this.addPlayer = function(player) {
         this.players.push(player);
     };
