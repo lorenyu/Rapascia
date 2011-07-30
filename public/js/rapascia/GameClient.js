@@ -248,17 +248,24 @@ var GameClient = Rapascia.GameClient = function(socket) {
                 gameClient.player === gameClient.game.selectedTile().player()) { // if player controls the selected tile
                     
                 $('#move-options').html(Rapascia.renderers.moveOptionsRenderer.call(gameClient.game.selectedTile()));
-                $this.tooltip({
+                $this.tooltip({ // jquery's tooltip library
 		            tip: '#move-options',
+                    
+                    events: {
+                        def:     "mouseover,",
+                        input:   "mouseover,",
+                        widget:  "mouseover,",
+                        tooltip: "mouseover,"
+                    },
 
 		            // custom positioning
-		            position: 'center center',
+                    position: 'center center',
 
-		            // move tooltip a little bit to the right
-		            //offset: [0, 15],
+                    // move tooltip a little bit to the right
+                    //offset: [0, 15],
 
-            		// there is no delay when the mouse is moved away from the trigger
-            		delay: 0
+                    // there is no delay when the mouse is moved away from the trigger
+                    delay: 0
                 }).data('tooltip').show();
             }
             break;
