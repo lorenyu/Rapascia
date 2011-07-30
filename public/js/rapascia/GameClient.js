@@ -208,13 +208,23 @@ var GameClient = Rapascia.GameClient = function(socket) {
     // NOTE: we're using mousedown instead of click since the game sometimes
     // re-renders in the middle of a click (between the mousedown and mouseup)
     // so the click never fires
+    $(document).bind('contextmenu', function() { return false; });
     $('.tile').live('mousedown', this.game, function(event) {
         var $this = $(this),
             game = event.data,
             tileId = parseInt($this.attr('tileid'), 10),
             tile = Tile.get(tileId);
         
-        game.selectedTile(tile);
+        switch (event.which) {
+        case 1: // left mouse button
+            game.selectedTile(tile);
+            break;
+        case 2: // middle mouse button
+            break;
+        case 3: // right mouse button
+            break;
+        }
+        return false;
     });
     
     $('.btn[action]').click(function(event) {
