@@ -32,6 +32,9 @@
   background-color: #c0e8e8;
   border-color: #c0e8e8;
 }
+.game .tile.selected {
+  border-color: #ff0000;
+}
 .game .tile .unit {
   background: #222;
   float: left;

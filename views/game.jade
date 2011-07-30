@@ -18,9 +18,6 @@ placeholder(define='script'):
                 });
             });
 
-            $('.btn[action]').click(function(event) {
-                socket.emit($(this).attr('action'));
-            });
             $(window).unload(function() {
             });
         });

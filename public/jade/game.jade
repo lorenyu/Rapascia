@@ -1,9 +1,6 @@
 - each row in this.map().tiles()
     .row
         - each tile in row
-            - if (tile.player())
-                .tile(player=tile.player().color())
-                    - each unit in tile.units()
-                        .unit
-            - else
-                .tile= ' '
+            .tile(tileid=tile.id(), player=tile.player() && tile.player().color(), class=[tile == this.selectedTile() ? 'selected' : ''])
+                - each unit in tile.units()
+                    .unit

@@ -14,6 +14,9 @@ Rapascia.models = {};
 var Game = Rapascia.models.Game = function() {
     this._players = [];
     this._map = new Map();
+    
+    // UI properties
+    this._selectedTile = null;
 };
 Game.prototype.players = function() {
     return this._players;
@@ -40,9 +43,17 @@ Game.prototype.addPlayer = function(player) {
             break;
     }
     
+    // add 4 units for the player
     _.each(_.range(4), function() {
         startingPosition.units().push(new Unit(player));
     });
+};
+// UI methods
+Game.prototype.selectedTile = function(tile) {
+    if (tile === undefined) {
+        return this._selectedTile;
+    }
+    this._selectedTile = tile;
 };
 
 /**
@@ -59,7 +70,7 @@ var Map = Rapascia.models.Map = function() {
     for (i = 0; i < numRows; i += 1) {
         tiles.push([]);
         for (j = 0; j < numCols; j += 1) {
-            tile = new Tile(numCols*i + numCols);
+            tile = new Tile(numCols*i + j);
             tile.index = numCols*i + numCols;
             tile.i = i;
             tile.j = j;
@@ -79,6 +90,14 @@ Map.prototype.tiles = function() {
 var Tile = Rapascia.models.Tile = function(id) {
     this._id = id;
     this._units = [];
+    Tile._tilesById[id] = this;
+};
+Tile._tilesById = {};
+Tile.get = function(id) {
+    return Tile._tilesById[id];
+};
+Tile.prototype.id = function() {
+    return this._id;
 };
 Tile.prototype.units = function() {
     return this._units;
@@ -185,6 +204,23 @@ var GameClient = Rapascia.GameClient = function(socket) {
     socket.on('player-left', $.proxy(function(player) {
         $('li.player[name=' + player.name + ']').remove(); // temporary
     }, this));
+    
+    // NOTE: we're using mousedown instead of click since the game sometimes
+    // re-renders in the middle of a click (between the mousedown and mouseup)
+    // so the click never fires
+    $('.tile').live('mousedown', this.game, function(event) {
+        var $this = $(this),
+            game = event.data,
+            tileId = parseInt($this.attr('tileid'), 10),
+            tile = Tile.get(tileId);
+        
+        game.selectedTile(tile);
+    });
+    
+    $('.btn[action]').click(function(event) {
+        var action = $(this).attr('action');
+        socket.emit(action);
+    });
 };
 GameClient.prototype.tick = function(data) {
     $('.time').text(data.time); // for debugging
@@ -200,7 +236,6 @@ GameClient.prototype.tick = function(data) {
     // update game state
     
     // render
-    console.log(Rapascia.renderers.gameRenderer.call(this.game));
     $('.game').html(Rapascia.renderers.gameRenderer.call(this.game));
     
     this.time = time;
