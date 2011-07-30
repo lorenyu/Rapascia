@@ -20,9 +20,20 @@ var GameServer = module.exports = function(game, socket) {
         });
         
         player.joinGame(game);
-        socket.emit('player-joined', {
+        
+        // tell everyone else the player joined
+        playerClient.broadcast.emit('player-joined', {
             name: player.name
         });
+        
+        // tell the player who he is
+        playerClient.emit('player-joined', {
+            id: player.id,
+            name: player.name,
+            isMe: true
+        });
+        
+        
         playerClient.on('start-game', function() {
             if (!game.timeStarted) {
                 self.start();

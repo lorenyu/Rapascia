@@ -196,6 +196,10 @@ $.get('/jade/game.jade', function(data) {
     Rapascia.renderers.gameRenderer = jade.compile(data);
 });
 
+$.get('/jade/move-options.jade', function(data) {
+    Rapascia.renderers.moveOptionsRenderer = jade.compile(data);
+});
+
 Rapascia.renderers.playerRenderer = jade.compile('li.player(name=this.name)= this.name');
 
 /**************
@@ -203,6 +207,7 @@ Rapascia.renderers.playerRenderer = jade.compile('li.player(name=this.name)= thi
  **************/
 var GameClient = Rapascia.GameClient = function(socket) {
     
+    this.player = null;
     this.game = new Rapascia.models.Game();
     this.socket = socket;
     
@@ -210,7 +215,11 @@ var GameClient = Rapascia.GameClient = function(socket) {
     socket.on('player-joined', $.proxy(function(playerData) {
         $('.players').append(Rapascia.renderers.playerRenderer.call(playerData)); // temporary for debugging
         
-        this.game.addPlayer(new Player(playerData));
+        var player = new Player(playerData);
+        this.game.addPlayer(player);
+        if (playerData.isMe) {
+            this.player = player;
+        }
         
     }, this));
     socket.on('player-left', $.proxy(function(player) {
@@ -230,17 +239,43 @@ var GameClient = Rapascia.GameClient = function(socket) {
         switch (event.which) {
         case 1: // left mouse button
             gameClient.game.selectedTile(tile);
+            $('#move-options').hide();
             break;
         case 2: // middle mouse button
             break;
         case 3: // right mouse button
-            if (gameClient.game.selectedTile().isAdjacentTo(tile)) {
-                // pop up context menu
-                alert('how many units to do you want to move?');
+            if (gameClient.game.selectedTile().isAdjacentTo(tile) &&
+                gameClient.player === gameClient.game.selectedTile().player()) { // if player controls the selected tile
+                    
+                $('#move-options').html(Rapascia.renderers.moveOptionsRenderer.call(gameClient.game.selectedTile()));
+                $this.tooltip({
+		            tip: '#move-options',
+
+		            // custom positioning
+		            position: 'center center',
+
+		            // move tooltip a little bit to the right
+		            //offset: [0, 15],
+
+            		// there is no delay when the mouse is moved away from the trigger
+            		delay: 0
+                }).data('tooltip').show();
             }
             break;
         }
         return false;
+    });
+    
+    $('#move-options .units .unit').live('mouseover', function(event) {
+        $this = $(this);
+        $this.nextAll().removeClass('selected');
+        var numUnits = $this.prevAll().andSelf().addClass('selected').length;
+        $this.parents('#move-options').find('.num-units').text(numUnits);
+    });
+    $('#move-options .move-all-units-btn').live('mouseover', function(event) {
+        $this = $(this);
+        var numUnits = $this.parents('#move-options').find('.unit').addClass('selected').length;
+        $this.parents('#move-options').find('.num-units').text(numUnits);
     });
     
     $('.btn[action]').click(function(event) {

@@ -45,3 +45,31 @@
 .game .tile .unitnth-of-type(5n) {
   clear: left;
 }
+#move-options {
+  background: #fefefe;
+  border: solid 1px #222;
+}
+#move-options .header {
+  background: #e8e8e8;
+}
+#move-options .units {
+  height: 50px;
+  padding: 6px;
+  width: 50px;
+}
+#move-options .units .unit {
+  background: #222;
+  float: left;
+  height: 4px;
+  margin: 4px 0 0 4px;
+  width: 4px;
+}
+#move-options .units .unitnth-of-type(5n) {
+  clear: left;
+}
+#move-options .units .unit.selected {
+  background: #f00;
+}
+#move-options .footer {
+  background: #e8e8e8;
+}

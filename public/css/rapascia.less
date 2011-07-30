@@ -8,6 +8,11 @@
 @unit-size: 4px;
 @tile-size: 50px;
 
+.unit-fn(@unit-size) {
+    background: #222; float: left; height: @unit-size; margin: 4px 0 0 4px; width: @unit-size;
+    &nth-of-type(5n) { clear: left; }
+}
+
 .game {
     .row { overflow: hidden; }
     .tile {
@@ -22,8 +27,18 @@
         &.selected { border-color: #ff0000; }
 
         .unit {
-            background: #222; float: left; height: @unit-size; margin: 4px 0 0 4px; width: @unit-size;
-            &nth-of-type(5n) { clear: left; }
+            .unit-fn(@unit-size);
         }
     }
+}
+#move-options {
+    background: #fefefe; border: solid 1px #222;
+    .header { background: #e8e8e8; }
+    .units {
+        height: @tile-size; padding: 6px; width: @tile-size;
+        .unit { .unit-fn(@unit-size);
+            &.selected { background: #f00; }
+        }
+    }
+    .footer { background: #e8e8e8; }
 }
