@@ -1,7 +1,10 @@
 var Map = require('./Map.js');
 
+var nextId = 1;
 var Game = module.exports = function() {
-    this.id = Math.random();
+    this.id = nextId;
+    nextId += 1;
+    
     this.timeStarted = null;
     this.players = [];
     

@@ -1,8 +1,11 @@
 var util = require('util');
 
+var nextId = 1;
 var Player = module.exports = function() {
     process.EventEmitter.call(this);
-    this.id = Math.random();
+    this.id = nextId;
+    nextId += 1;
+    
     this.name = 'Player'+this.id;
     this.game = null;
     
