@@ -22,21 +22,27 @@ Game.prototype.map = function() {
     return this._map;
 };
 Game.prototype.addPlayer = function(player) {
+    var startingPosition;
+    
     this.players().push(player);
     switch (player.index()) {
         case 1:
-            this.map().tiles()[0][0].units().push(new Unit(player));
+            startingPosition = this.map().tiles()[0][0];
             break;
         case 2:
-            this.map().tiles()[11][11].units().push(new Unit(player));
+            startingPosition = this.map().tiles()[11][11];
             break;
         case 3:
-            this.map().tiles()[0][11].units().push(new Unit(player));
+            startingPosition = this.map().tiles()[0][11];
             break;
         case 4:
-            this.map().tiles()[11][0].units().push(new Unit(player));
+            startingPosition = this.map().tiles()[11][0];
             break;
     }
+    
+    _.each(_.range(4), function() {
+        startingPosition.units().push(new Unit(player));
+    });
 };
 
 /**
