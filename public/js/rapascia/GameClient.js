@@ -62,32 +62,38 @@ Game.prototype.selectedTile = function(tile) {
 var Map = Rapascia.models.Map = function() {
 
     // hardcode map for now
-    var numRows = 12,
-        numCols = 12,
-        tiles = [], tile,
+    var numRows = this.numRows = 12,
+        numCols = this.numCols = 12,
+        tiles = this._tiles = [], tile,
         i,
         j;
     for (i = 0; i < numRows; i += 1) {
         tiles.push([]);
         for (j = 0; j < numCols; j += 1) {
-            tile = new Tile(numCols*i + j);
+            tile = new Tile(this, numCols*i + j);
             tile.index = numCols*i + numCols;
             tile.i = i;
             tile.j = j;
             tiles[i].push(tile);
         }
     }
-
-    this._tiles = tiles;
 };
 Map.prototype.tiles = function() {
     return this._tiles;
+};
+Map.prototype.isAdjacent = function(tileA, tileB) {
+    var rowA = Math.floor(tileA.id() / this.numCols),
+        colA = tileA.id() % this.numCols,
+        rowB = Math.floor(tileB.id() / this.numCols),
+        colB = tileB.id() % this.numCols;
+    return Math.abs(rowA - rowB) + Math.abs(colA - colB) == 1;
 };
 
 /**
  * Tile Model
  */
-var Tile = Rapascia.models.Tile = function(id) {
+var Tile = Rapascia.models.Tile = function(map, id) {
+    this._map = map;
     this._id = id;
     this._units = [];
     Tile._tilesById[id] = this;
@@ -95,6 +101,9 @@ var Tile = Rapascia.models.Tile = function(id) {
 Tile._tilesById = {};
 Tile.get = function(id) {
     return Tile._tilesById[id];
+};
+Tile.prototype.map = function() {
+    return this._map;
 };
 Tile.prototype.id = function() {
     return this._id;
@@ -107,6 +116,9 @@ Tile.prototype.player = function() {
         return this.units()[0].player();
     }
     return null;
+};
+Tile.prototype.isAdjacentTo = function(tile) {
+    return this.map().isAdjacent(this, tile);
 };
 
 /**
@@ -209,19 +221,23 @@ var GameClient = Rapascia.GameClient = function(socket) {
     // re-renders in the middle of a click (between the mousedown and mouseup)
     // so the click never fires
     $(document).bind('contextmenu', function() { return false; });
-    $('.tile').live('mousedown', this.game, function(event) {
+    $('.tile').live('mousedown', this, function(event) {
         var $this = $(this),
-            game = event.data,
+            gameClient = event.data,
             tileId = parseInt($this.attr('tileid'), 10),
             tile = Tile.get(tileId);
         
         switch (event.which) {
         case 1: // left mouse button
-            game.selectedTile(tile);
+            gameClient.game.selectedTile(tile);
             break;
         case 2: // middle mouse button
             break;
         case 3: // right mouse button
+            if (gameClient.game.selectedTile().isAdjacentTo(tile)) {
+                // pop up context menu
+                alert('how many units to do you want to move?');
+            }
             break;
         }
         return false;
