@@ -5,14 +5,23 @@
 @magenta: #e8c0e8;
 @cyan: #c0e8e8;
 
+@unit-size: 4px;
+@tile-size: 50px;
+
 .game {
+    .row { overflow: hidden; }
     .tile {
-        border: solid 1px; padding: 6px;
+        border: solid 1px; float: left; height: @tile-size; padding: 6px; width: @tile-size;
         &[player=red] { background-color: @red; border-color: @red; }
         &[player=green] { background-color: @green; border-color: @green;}
         &[player=blue] { background-color: @blue; border-color: @blue;}
         &[player=orange] { background-color: @orange; border-color: @orange;}
         &[player=magenta] { background-color: @magenta; border-color: @magenta;}
         &[player=cyan] { background-color: @cyan; border-color: @cyan;}
+
+        .unit {
+            background: #222; float: left; height: @unit-size; margin: 4px 0 0 4px; width: @unit-size;
+            &nth-of-type(5n) { clear: left; }
+        }
     }
 }

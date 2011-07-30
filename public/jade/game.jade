@@ -1,7 +1,9 @@
 - each row in this.map().tiles()
-    tr
+    .row
         - each tile in row
             - if (tile.player())
-                td.tile(player=tile.player().color())= tile.units().length
+                .tile(player=tile.player().color())
+                    - each unit in tile.units()
+                        .unit
             - else
-                td.tile
+                .tile= ' '

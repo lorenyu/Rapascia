@@ -1,6 +1,12 @@
+.game .row {
+  overflow: hidden;
+}
 .game .tile {
   border: solid 1px;
+  float: left;
+  height: 50px;
   padding: 6px;
+  width: 50px;
 }
 .game .tile[player=red] {
   background-color: #e8c0c0;
@@ -25,4 +31,14 @@
 .game .tile[player=cyan] {
   background-color: #c0e8e8;
   border-color: #c0e8e8;
+}
+.game .tile .unit {
+  background: #222;
+  float: left;
+  height: 4px;
+  margin: 4px 0 0 4px;
+  width: 4px;
+}
+.game .tile .unitnth-of-type(5n) {
+  clear: left;
 }
