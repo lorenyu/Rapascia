@@ -36,14 +36,26 @@
   border-color: #ff0000;
 }
 .game .tile .unit {
-  background: #222;
   float: left;
-  height: 4px;
-  margin: 4px 0 0 4px;
-  width: 4px;
+  height: 8px;
+  padding: 2px;
+  width: 8px;
+}
+.game .tile .unit .unit-icon {
+  background: #222;
+  height: 6px;
+  width: 6px;
 }
 .game .tile .unitnth-of-type(5n) {
   clear: left;
+}
+.game .tile .unit.selecting .unit-icon {
+  background: #f00;
+}
+.game .tile .unit.selected .unit-icon {
+  border: solid 1px #f00;
+  height: 5px;
+  width: 5px;
 }
 #move-options {
   background: #fefefe;
@@ -58,11 +70,15 @@
   width: 50px;
 }
 #move-options .units .unit {
-  background: #222;
   float: left;
-  height: 4px;
-  margin: 4px 0 0 4px;
-  width: 4px;
+  height: 8px;
+  padding: 2px;
+  width: 8px;
+}
+#move-options .units .unit .unit-icon {
+  background: #222;
+  height: 6px;
+  width: 6px;
 }
 #move-options .units .unitnth-of-type(5n) {
   clear: left;

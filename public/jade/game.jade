@@ -2,5 +2,7 @@
     .row
         - each tile in row
             .tile(tileid=tile.id(), player=tile.player() && tile.player().color(), class=[tile == this.selectedTile() ? 'selected' : ''])
-                - each unit in tile.units()
-                    .unit
+                .units
+                    - each unit in tile.units()
+                        .unit(unitid=unit.id())
+                            .unit-icon

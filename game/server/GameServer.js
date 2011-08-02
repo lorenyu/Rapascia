@@ -36,6 +36,9 @@ var GameServer = module.exports = function(game, socket) {
         
         playerClient.on('start-game', function() {
             if (!game.timeStarted) {
+                self.commands.push({
+                    name: 'start-game'
+                });
                 self.start();
             }
         });

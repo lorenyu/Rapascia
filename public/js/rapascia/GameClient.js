@@ -17,6 +17,7 @@ var Game = Rapascia.models.Game = function() {
     
     // UI properties
     this._selectedTile = null;
+    this._selectedUnits = null;
 };
 Game.prototype.players = function() {
     return this._players;
@@ -50,6 +51,12 @@ Game.prototype.addPlayer = function(player) {
 };
 // UI methods
 Game.prototype.selectedTile = function(tile) {
+    if (tile === undefined) {
+        return this._selectedTile;
+    }
+    this._selectedTile = tile;
+};
+Game.prototype.selectedUnits = function(tile) {
     if (tile === undefined) {
         return this._selectedTile;
     }
@@ -125,10 +132,22 @@ Tile.prototype.isAdjacentTo = function(tile) {
  * Unit Model
  */
 var Unit = Rapascia.models.Unit = function(player) {
+    this._id = Unit._nextId;
+    Unit._nextId += 1;
     this._player = player;
     this._mode = 'stopped';
     this._health = 10;
     this._cooldown = 0;
+    
+    Unit._unitsById[this._id] = this;
+};
+Unit._nextId = 1;
+Unit._unitsById = {};
+Unit.get = function(id) {
+    return Unit._unitsById[id];
+};
+Unit.prototype.id = function() {
+    return this._id;
 };
 Unit.prototype.player = function() {
     return this._player;
@@ -194,6 +213,7 @@ Rapascia.renderers = {};
 
 $.get('/jade/game.jade', function(data) {
     Rapascia.renderers.gameRenderer = jade.compile(data);
+    $(Rapascia).trigger('game-renderer-ready');
 });
 
 $.get('/jade/move-options.jade', function(data) {
@@ -233,56 +253,51 @@ var GameClient = Rapascia.GameClient = function(socket) {
     $('.tile').live('mousedown', this, function(event) {
         var $this = $(this),
             gameClient = event.data,
-            tileId = parseInt($this.attr('tileid'), 10),
-            tile = Tile.get(tileId);
+            tile = Tile.get(parseInt($this.attr('tileid'), 10));
         
         switch (event.which) {
         case 1: // left mouse button
             gameClient.game.selectedTile(tile);
-            $('#move-options').hide();
+            $('.tile.selected').removeClass('selected');
+            $this.addClass('selected');
             break;
         case 2: // middle mouse button
             break;
         case 3: // right mouse button
             if (gameClient.game.selectedTile().isAdjacentTo(tile) &&
                 gameClient.player === gameClient.game.selectedTile().player()) { // if player controls the selected tile
-                    
-                $('#move-options').html(Rapascia.renderers.moveOptionsRenderer.call(gameClient.game.selectedTile()));
-                $this.tooltip({ // jquery's tooltip library
-		            tip: '#move-options',
-                    
-                    events: {
-                        def:     "mouseover,",
-                        input:   "mouseover,",
-                        widget:  "mouseover,",
-                        tooltip: "mouseover,"
-                    },
-
-		            // custom positioning
-                    position: 'center center',
-
-                    // move tooltip a little bit to the right
-                    //offset: [0, 15],
-
-                    // there is no delay when the mouse is moved away from the trigger
-                    delay: 0
-                }).data('tooltip').show();
+                
+                // move units
+                console.log('Moving units ' + gameClient.game.selectedUnits() + ' to tile ' + tile.id());
             }
             break;
         }
         return false;
     });
     
-    $('#move-options .units .unit').live('mouseover', function(event) {
-        $this = $(this);
-        $this.nextAll().removeClass('selected');
-        var numUnits = $this.prevAll().andSelf().addClass('selected').length;
-        $this.parents('#move-options').find('.num-units').text(numUnits);
+    $('.tile .units .unit').live({
+        'mouseover': function(event) {
+            $this = $(this);
+            $this.nextAll().removeClass('selecting');
+            var numUnits = $this.prevAll().andSelf().addClass('selecting').length;
+        },
+        'mouseout': function(event) {
+            $this = $(this);
+            $this.siblings('.unit').andSelf().removeClass('selecting');
+        },
+        'mousedown': function(event) {
+            $this = $(this);
+            var units = $this.prevAll().andSelf().addClass('selected').map(function() {
+                return Unit.get($(this).attr('unitid'));
+            });
+            //console.log(units);
+            gameClient.game.selectedUnits(units);
+        }
     });
-    $('#move-options .move-all-units-btn').live('mouseover', function(event) {
+    $('.tile .move-all-units-btn').live('mouseover', function(event) {
         $this = $(this);
-        var numUnits = $this.parents('#move-options').find('.unit').addClass('selected').length;
-        $this.parents('#move-options').find('.num-units').text(numUnits);
+        var numUnits = $this.parents('.tile').find('.unit').addClass('selecting').length;
+        $this.parents('.tile').find('.num-units').text(numUnits);
     });
     
     $('.btn[action]').click(function(event) {
@@ -300,15 +315,21 @@ GameClient.prototype.tick = function(data) {
     timeElapsed = time - this.time;    
     
     // process player commands
+    _.each(commands, _.bind(this.execute, this));
     
     // update game state
     
     // render
-    $('.game').html(Rapascia.renderers.gameRenderer.call(this.game));
+    
     
     this.time = time;
 };
-
+GameClient.prototype.execute = function(command) {
+    switch (command.name) {
+    case 'start-game': $('.game').html(Rapascia.renderers.gameRenderer.call(this.game));
+        break;
+    }
+};
 GameClient.prototype.sendCommand = function(command) {
     this.socket.emit('player-command', command);
 };

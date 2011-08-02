@@ -5,11 +5,14 @@
 @magenta: #e8c0e8;
 @cyan: #c0e8e8;
 
-@unit-size: 4px;
+@unit-size: 8px;
 @tile-size: 50px;
 
 .unit-fn(@unit-size) {
-    background: #222; float: left; height: @unit-size; margin: 4px 0 0 4px; width: @unit-size;
+    float: left; height: @unit-size; padding: 2px; width: @unit-size;
+    .unit-icon {
+        background: #222; height: @unit-size - 2; width: @unit-size - 2;
+    }
     &nth-of-type(5n) { clear: left; }
 }
 
@@ -28,6 +31,8 @@
 
         .unit {
             .unit-fn(@unit-size);
+            &.selecting .unit-icon { background: #f00; }
+            &.selected .unit-icon { border: solid 1px #f00; height: @unit-size - 3; width: @unit-size - 3; }
         }
     }
 }
