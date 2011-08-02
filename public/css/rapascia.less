@@ -6,7 +6,7 @@
 @cyan: #c0e8e8;
 
 @unit-size: 8px;
-@tile-size: 50px;
+@tile-size: 60px;
 
 .unit-fn(@unit-size) {
     float: left; height: @unit-size; padding: 2px; width: @unit-size;
@@ -31,8 +31,8 @@
 
         .unit {
             .unit-fn(@unit-size);
-            &.selecting .unit-icon { background: #f00; }
-            &.selected .unit-icon { border: solid 1px #f00; height: @unit-size - 3; width: @unit-size - 3; }
+            &[selecting] .unit-icon { background: #f00; }
+            &[selected] .unit-icon { border: solid 1px #f00; height: @unit-size - 3; width: @unit-size - 3; }
         }
     }
 }
@@ -42,7 +42,7 @@
     .units {
         height: @tile-size; padding: 6px; width: @tile-size;
         .unit { .unit-fn(@unit-size);
-            &.selected { background: #f00; }
+            &selected { background: #f00; }
         }
     }
     .footer { background: #e8e8e8; }

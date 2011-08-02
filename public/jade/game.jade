@@ -1,10 +1,10 @@
 - each row in this.map().tiles()
     .row
         - each tile in row
-            .tile(tileid=tile.id(), player=tile.player() && tile.player().color(), class=[tile == this.selectedTile() ? 'selected' : ''])
+            .tile(model='Tile', modelid=tile.id(), player=tile.player() && tile.player().color(), class=[tile.selected() ? 'selected' : ''])
                 .units
                     - each unit in tile.units()
-                        .unit(unitid=unit.id())
+                        .unit(model='Unit', modelid=unit.id(), selecting=unit.selecting(), selected=unit.selected())
                             .unit-icon
 .hud
     .minimap

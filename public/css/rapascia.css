@@ -4,9 +4,9 @@
 .game .tile {
   border: solid 1px;
   float: left;
-  height: 50px;
+  height: 60px;
   padding: 6px;
-  width: 50px;
+  width: 60px;
 }
 .game .tile[player=red] {
   background-color: #e8c0c0;
@@ -49,10 +49,10 @@
 .game .tile .unitnth-of-type(5n) {
   clear: left;
 }
-.game .tile .unit.selecting .unit-icon {
+.game .tile .unit[selecting] .unit-icon {
   background: #f00;
 }
-.game .tile .unit.selected .unit-icon {
+.game .tile .unit[selected] .unit-icon {
   border: solid 1px #f00;
   height: 5px;
   width: 5px;
@@ -65,9 +65,9 @@
   background: #e8e8e8;
 }
 #move-options .units {
-  height: 50px;
+  height: 60px;
   padding: 6px;
-  width: 50px;
+  width: 60px;
 }
 #move-options .units .unit {
   float: left;
@@ -83,7 +83,7 @@
 #move-options .units .unitnth-of-type(5n) {
   clear: left;
 }
-#move-options .units .unit.selected {
+#move-options .units .unitselected {
   background: #f00;
 }
 #move-options .footer {

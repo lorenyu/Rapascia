@@ -1,5 +1,63 @@
 (function(window, undefined ) {
     
+    /**
+     * Inherit the prototype methods from one constructor into another.
+     *
+     * Example:
+     *
+     *     function foo(){};
+     *     foo.prototype.hello = function(){ console.log( this.words )};
+     *     
+     *     function bar(){
+     *       this.words = "Hello world";
+     *     };
+     *     
+     *     io.util.inherit(bar,foo);
+     *     var person = new bar();
+     *     person.hello();
+     *     // => "Hello World"
+     *
+     * @param {Constructor} ctor The constructor that needs to inherit the methods.
+     * @param {Constructor} superCtor The constructor to inherit from.
+     * @api public
+     */
+    var util = {};
+    util.inherit = function(ctor, superCtor){
+        // no support for `instanceof` for now
+        for (var i in superCtor.prototype){
+            ctor.prototype[i] = superCtor.prototype[i];
+        }
+    };
+    
+    
+    
+    
+    
+    
+    
+    
+    $.fn.rapascia = function(method) {
+        if (method == 'getModel') {
+            var models = this.map(function() {
+                var $this = $(this),
+                    modelClass = $this.attr('model'),
+                    modelid = $this.attr('modelid');
+                //console.log(Rapascia.models[modelClass].get(modelid));
+                return Rapascia.models[modelClass].get(modelid);
+            });
+            return models;
+        }
+        return this;
+    };
+    
+    
+    
+    
+    
+    
+    
+    
+    
 var Rapascia = window.Rapascia = {};
 
 /***************
@@ -17,6 +75,7 @@ var Game = Rapascia.models.Game = function() {
     
     // UI properties
     this._selectedTile = null;
+    this._selectingUnits = null;
     this._selectedUnits = null;
 };
 Game.prototype.players = function() {
@@ -54,12 +113,39 @@ Game.prototype.selectedTile = function(tile) {
     if (tile === undefined) {
         return this._selectedTile;
     }
+    
+    if (this._selectedTile) {
+        this._selectedTile.selected(false); // deselect current tile
+    }
+    if (tile) {
+        tile.selected(true); // select next tile
+    }
     this._selectedTile = tile;
+};
+Game.prototype.selectingUnits = function(units) {
+    if (units === undefined) {
+        return this._selectingUnits;
+    }
+    
+    _.each(this._selectingUnits || [], function(unit) {
+        unit.selecting(false);
+    });
+    _.each(units || [], function(unit) {
+        unit.selecting(true);
+    });
+    this._selectingUnits = units;
 };
 Game.prototype.selectedUnits = function(units) {
     if (units === undefined) {
         return this._selectedUnits;
     }
+    
+    _.each(this._selectedUnits || [], function(unit) {
+        unit.selected(false);
+    });
+    _.each(units || [], function(unit) {
+        unit.selected(true);
+    });
     this._selectedUnits = units;
 };
 
@@ -104,6 +190,9 @@ var Tile = Rapascia.models.Tile = function(map, id) {
     this._id = id;
     this._units = [];
     Tile._tilesById[id] = this;
+    
+    // UI properties
+    this._selected = false;
 };
 Tile._tilesById = {};
 Tile.get = function(id) {
@@ -118,6 +207,12 @@ Tile.prototype.id = function() {
 Tile.prototype.units = function() {
     return this._units;
 };
+Tile.prototype.addUnits = function(units) {
+    this._units = _.union(this.units(), units);
+};
+Tile.prototype.removeUnits = function(units) {
+    this._units = _.difference(this.units(), units);
+};
 Tile.prototype.player = function() {
     if (this.units().length > 0) {
         return this.units()[0].player();
@@ -126,6 +221,15 @@ Tile.prototype.player = function() {
 };
 Tile.prototype.isAdjacentTo = function(tile) {
     return this.map().isAdjacent(this, tile);
+};
+Tile.prototype.selected = function(selected) {
+    if (selected === undefined) {
+        return this._selected;
+    }
+    this._selected = selected;
+};
+Tile.prototype.toggleSelected = function() {
+    this._selected = !this._selected;
 };
 
 /**
@@ -140,6 +244,10 @@ var Unit = Rapascia.models.Unit = function(player) {
     this._cooldown = 0;
     
     Unit._unitsById[this._id] = this;
+    
+    // UI properties
+    this._selecting = false;
+    this._selected = false;
 };
 Unit._nextId = 1;
 Unit._unitsById = {};
@@ -173,6 +281,24 @@ Unit.prototype.health = function() {
 };
 Unit.prototype.isTransitioning = function() {
     return this._cooldown > 0;
+};
+Unit.prototype.selecting = function(selecting) {
+    if (selecting === undefined) {
+        return this._selecting;
+    }
+    this._selecting = selecting;
+};
+Unit.prototype.toggleSelecting = function() {
+    this._selecting = !this._selecting;
+};
+Unit.prototype.selected = function(selected) {
+    if (selected === undefined) {
+        return this._selected;
+    }
+    this._selected = selected;
+};
+Unit.prototype.toggleSelected = function() {
+    this._selected = !this._selected;
 };
 
 /**
@@ -231,8 +357,8 @@ var GameClient = Rapascia.GameClient = function(socket) {
     this.game = new Rapascia.models.Game();
     this.socket = socket;
     
-    socket.on('tick', $.proxy(this.tick, this));
-    socket.on('player-joined', $.proxy(function(playerData) {
+    socket.on('tick', _.bind(this.tick, this));
+    socket.on('player-joined', _.bind(function(playerData) {
         $('.players').append(Rapascia.renderers.playerRenderer.call(playerData)); // temporary for debugging
         
         var player = new Player(playerData);
@@ -242,7 +368,7 @@ var GameClient = Rapascia.GameClient = function(socket) {
         }
         
     }, this));
-    socket.on('player-left', $.proxy(function(player) {
+    socket.on('player-left', _.bind(function(player) {
         $('li.player[name=' + player.name + ']').remove(); // temporary
     }, this));
     
@@ -253,13 +379,11 @@ var GameClient = Rapascia.GameClient = function(socket) {
     $('.tile').live('mousedown', this, function(event) {
         var $this = $(this),
             gameClient = event.data,
-            tile = Tile.get(parseInt($this.attr('tileid'), 10));
+            tile = $this.rapascia('getModel')[0];
         
         switch (event.which) {
         case 1: // left mouse button
             gameClient.game.selectedTile(tile);
-            $('.tile.selected').removeClass('selected');
-            $this.addClass('selected');
             break;
         case 2: // middle mouse button
             break;
@@ -269,7 +393,7 @@ var GameClient = Rapascia.GameClient = function(socket) {
                 
                 // move units
                 console.log('Moving units ' + gameClient.game.selectedUnits() + ' to tile ' + tile.id());
-                gameClient.sendCommand(new Rapascia.commands.Move(gameClient.game.selectedUnits(), tile));
+                gameClient.sendCommand(new Rapascia.commands.Move(gameClient.game.selectedUnits(), gameClient.game.selectedTile(), tile));
             }
             break;
         }
@@ -279,27 +403,26 @@ var GameClient = Rapascia.GameClient = function(socket) {
     $('.tile .units .unit').live({
         'mouseover': function(event) {
             $this = $(this);
-            $this.nextAll().removeClass('selecting');
-            var numUnits = $this.prevAll().andSelf().addClass('selecting').length;
+            var units = $this.prevAll().andSelf().rapascia('getModel');
+            gameClient.game.selectingUnits(units);
         },
         'mouseout': function(event) {
-            $this = $(this);
-            $this.siblings('.unit').andSelf().removeClass('selecting');
+            gameClient.game.selectingUnits([]);
         },
         'mousedown': function(event) {
             $this = $(this);
-            var units = $this.prevAll().andSelf().addClass('selected').map(function() {
-                return Unit.get($(this).attr('unitid'));
-            });
+            var units = $this.prevAll().andSelf().rapascia('getModel');
             //console.log(units);
             gameClient.game.selectedUnits(units);
         }
     });
+    /*
     $('.tile .move-all-units-btn').live('mouseover', function(event) {
         $this = $(this);
         var numUnits = $this.parents('.tile').find('.unit').addClass('selecting').length;
         $this.parents('.tile').find('.num-units').text(numUnits);
     });
+    */
     
     $('.btn[action]').click(function(event) {
         var action = $(this).attr('action');
@@ -319,6 +442,7 @@ GameClient.prototype.tick = function(data) {
     _.each(commands, _.bind(this.execute, this));
     
     // update game state
+    $('.game').html(Rapascia.renderers.gameRenderer.call(this.game));
     
     // render
     
@@ -328,12 +452,14 @@ GameClient.prototype.tick = function(data) {
 GameClient.prototype.execute = function(command) {
     console.log(command);
     switch (command.name) {
-    case 'start-game': $('.game').html(Rapascia.renderers.gameRenderer.call(this.game));
+    case 'start-game':
+        break;
+    case 'move': MoveCommand.deserialize(command).execute();
         break;
     }
 };
 GameClient.prototype.sendCommand = function(command) {
-    this.socket.emit('player-command', command);
+    this.socket.emit('player-command', command.serialize());
 };
 
 /***********************
@@ -341,13 +467,35 @@ GameClient.prototype.sendCommand = function(command) {
  ***********************/
  
 Rapascia.commands = {};
-var MoveCommand = Rapascia.commands.Move = function(units, destination) {
+var MoveCommand = Rapascia.commands.Move = function(units, from, to) {
     console.log(units);
     this.name = 'move';
-    this.units = _.map(units, function(unit) {
-        return unit.id();
-    });
-    this.destination = destination.id();
+    this.units = units;
+    this.from = from;
+    this.to = to;
+};
+MoveCommand.prototype.execute = function() {
+    this.from.removeUnits(this.units);
+    this.to.addUnits(this.units);
+};
+MoveCommand.prototype.serialize = function() {
+    return {
+        name: this.name,
+        units: _.map(this.units, function(unit) {
+            return unit.id();
+        }),
+        from: this.from.id(),
+        to: this.to.id()
+    };
+};
+MoveCommand.deserialize = function(command) {
+    var units = _.map(command.units, function(unitid) {
+            return Unit.get(unitid);
+        }),
+        from = Tile.get(command.from),
+        to = Tile.get(command.to);
+    
+    return new MoveCommand(units, from, to);
 };
 
 })(window);
