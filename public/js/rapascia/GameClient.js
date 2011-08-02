@@ -326,6 +326,7 @@ GameClient.prototype.tick = function(data) {
     this.time = time;
 };
 GameClient.prototype.execute = function(command) {
+    console.log(command);
     switch (command.name) {
     case 'start-game': $('.game').html(Rapascia.renderers.gameRenderer.call(this.game));
         break;

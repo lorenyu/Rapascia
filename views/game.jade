@@ -5,18 +5,7 @@ placeholder(define='script'):
     script
         $(document).ready(function() {
             var socket = io.connect('/rapascia' + window.location.pathname);
-            
-            var jade = require('jade');
-            var commandRenderer = jade.compile('li.command= this');
-
             window.gameClient = new Rapascia.GameClient(socket);
-
-            socket.on('tick', function(data) {
-                $('.time').text(data.time);
-                $.each(data.commands, function(i, command) {
-                    $('.commands').append(commandRenderer.call(command));
-                });
-            });
 
             $(window).unload(function() {
             });
@@ -31,7 +20,5 @@ section
     ul.players
 section
     ul.commands
-#move-options(style="display:none;")
-    How many do you want to move?
 .game
 // canvas(data-processing-sources="/processing/game.pde")
