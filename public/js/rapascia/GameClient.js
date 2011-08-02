@@ -56,11 +56,11 @@ Game.prototype.selectedTile = function(tile) {
     }
     this._selectedTile = tile;
 };
-Game.prototype.selectedUnits = function(tile) {
-    if (tile === undefined) {
-        return this._selectedTile;
+Game.prototype.selectedUnits = function(units) {
+    if (units === undefined) {
+        return this._selectedUnits;
     }
-    this._selectedTile = tile;
+    this._selectedUnits = units;
 };
 
 /**
@@ -269,6 +269,7 @@ var GameClient = Rapascia.GameClient = function(socket) {
                 
                 // move units
                 console.log('Moving units ' + gameClient.game.selectedUnits() + ' to tile ' + tile.id());
+                gameClient.sendCommand(new Rapascia.commands.Move(gameClient.game.selectedUnits(), tile));
             }
             break;
         }
@@ -332,6 +333,20 @@ GameClient.prototype.execute = function(command) {
 };
 GameClient.prototype.sendCommand = function(command) {
     this.socket.emit('player-command', command);
+};
+
+/***********************
+ * Command Definitions *
+ ***********************/
+ 
+Rapascia.commands = {};
+var MoveCommand = Rapascia.commands.Move = function(units, destination) {
+    console.log(units);
+    this.name = 'move';
+    this.units = _.map(units, function(unit) {
+        return unit.id();
+    });
+    this.destination = destination.id();
 };
 
 })(window);

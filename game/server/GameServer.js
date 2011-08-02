@@ -48,10 +48,10 @@ var GameServer = module.exports = function(game, socket) {
             });
         });
         playerClient.on('player-command', function(command) {
-            console.log('player-command');
-            console.log(command);
             command.time = new Date().getTime();
             self.commands.push(command);
+            console.log('player-command:');
+            console.log(command);
         });
     });
 };
