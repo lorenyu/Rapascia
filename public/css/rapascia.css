@@ -57,6 +57,20 @@
   height: 5px;
   width: 5px;
 }
+.game .tile .actions {
+  clear: both;
+  margin-top: 4px;
+}
+.game .tile .actions .action {
+  background: #ccc;
+  cursor: pointer;
+  display: inline-block;
+  font-family: arial;
+  padding: 0 4px;
+}
+.game .tile .actions .action.defend {
+  margin-left: 4px;
+}
 #move-options {
   background: #fefefe;
   border: solid 1px #222;

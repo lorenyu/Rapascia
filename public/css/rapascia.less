@@ -34,6 +34,15 @@
             &[selecting] .unit-icon { background: #f00; }
             &[selected] .unit-icon { border: solid 1px #f00; height: @unit-size - 3; width: @unit-size - 3; }
         }
+
+        .actions {
+            clear: both; margin-top: 4px;
+            .action {
+                background: #ccc; cursor: pointer; display: inline-block; font-family: arial; padding: 0 4px;
+                &.produce { }
+                &.defend { margin-left: 4px; }
+            }
+        }
     }
 }
 #move-options {

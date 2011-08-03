@@ -6,6 +6,10 @@
                     - each unit in tile.units()
                         .unit(model='Unit', modelid=unit.id(), selecting=unit.selecting(), selected=unit.selected())
                             .unit-icon
+                - if (tile.selected())
+                    .actions
+                        .action.produce(action="produce") P
+                        .action.defend(action="defend") D
 .hud
     .minimap
     .unit-summary
