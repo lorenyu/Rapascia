@@ -2,7 +2,7 @@
   overflow: hidden;
 }
 .game .tile {
-  border: solid 1px;
+  border: solid 2px #000;
   float: left;
   height: 60px;
   padding: 6px;
@@ -32,8 +32,14 @@
   background-color: #c0e8e8;
   border-color: #c0e8e8;
 }
-.game .tile.selected {
-  border-color: #ff0000;
+.game .tile[selected] {
+  border-color: #0f0;
+}
+.game .tile[mode=producing] {
+  border-color: #0ff;
+}
+.game .tile[mode=defending] {
+  border-color: #f00;
 }
 .game .tile .unit {
   float: left;
@@ -49,13 +55,11 @@
 .game .tile .unitnth-of-type(5n) {
   clear: left;
 }
-.game .tile .unit[selecting] .unit-icon {
-  background: #f00;
+.game .tile .unit[selecting] {
+  background: #0f0;
 }
-.game .tile .unit[selected] .unit-icon {
-  border: solid 1px #f00;
-  height: 5px;
-  width: 5px;
+.game .tile .unit[selected] {
+  background: #0f0;
 }
 .game .tile .actions {
   clear: both;

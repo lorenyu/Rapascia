@@ -19,7 +19,7 @@
 .game {
     .row { overflow: hidden; }
     .tile {
-        border: solid 1px; float: left; height: @tile-size; padding: 6px; width: @tile-size;
+        border: solid 2px #000; float: left; height: @tile-size; padding: 6px; width: @tile-size;
         &[player=red] { background-color: @red; border-color: @red; }
         &[player=green] { background-color: @green; border-color: @green;}
         &[player=blue] { background-color: @blue; border-color: @blue;}
@@ -27,12 +27,14 @@
         &[player=magenta] { background-color: @magenta; border-color: @magenta;}
         &[player=cyan] { background-color: @cyan; border-color: @cyan;}
 
-        &.selected { border-color: #ff0000; }
+        &[selected] { border-color: #0f0; }
+        &[mode=producing] { border-color: #0ff;  }
+        &[mode=defending] { border-color: #f00; }
 
         .unit {
             .unit-fn(@unit-size);
-            &[selecting] .unit-icon { background: #f00; }
-            &[selected] .unit-icon { border: solid 1px #f00; height: @unit-size - 3; width: @unit-size - 3; }
+            &[selecting] { background: #0f0; }
+            &[selected] { background: #0f0; }
         }
 
         .actions {

@@ -1,7 +1,7 @@
 - each row in this.map().tiles()
     .row
         - each tile in row
-            .tile(model='Tile', modelid=tile.id(), player=tile.player() && tile.player().color(), class=[tile.selected() ? 'selected' : ''])
+            .tile(model='Tile', modelid=tile.id(), player=tile.player() && tile.player().color(), mode=tile.mode(), selected=tile.selected())
                 .units
                     - each unit in tile.units()
                         .unit(model='Unit', modelid=unit.id(), selecting=unit.selecting(), selected=unit.selected())
