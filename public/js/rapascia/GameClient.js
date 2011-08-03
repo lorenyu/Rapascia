@@ -389,8 +389,16 @@ Unit.prototype.toggleSelected = function() {
 /**
  * Player Model
  */
-var Player = Rapascia.models.Player = function() {
+var Player = Rapascia.models.Player = function(name, isMe) {
     this._index = Player.nextIndex();
+    this._name = name;
+    this._isMe = isMe;
+};
+Player.prototype.name = function() {
+    return this._name;
+};
+Player.prototype.isMe = function() {
+    return this._isMe;
 };
 Player.nextIndex = (function() {
     var index = 1;
@@ -431,7 +439,7 @@ $.get('/jade/move-options.jade', function(data) {
     Rapascia.renderers.moveOptionsRenderer = jade.compile(data);
 });
 
-Rapascia.renderers.playerRenderer = jade.compile('li.player(name=this.name)= this.name');
+Rapascia.renderers.playerRenderer = jade.compile('li.player(name=this.name(), player=this.color(), me=this.isMe())= this.name()');
 
 /**************
  * GameClient *
@@ -444,9 +452,11 @@ var GameClient = Rapascia.GameClient = function(socket) {
     
     socket.on('tick', _.bind(this.tick, this));
     socket.on('player-joined', _.bind(function(playerData) {
-        $('.players').append(Rapascia.renderers.playerRenderer.call(playerData)); // temporary for debugging
         
-        var player = new Player(playerData);
+        var player = new Player(playerData.name, playerData.isMe);
+        
+        $('.players').append(Rapascia.renderers.playerRenderer.call(player)); // temporary for debugging
+        
         this.game.addPlayer(player);
         if (playerData.isMe) {
             this.player = player;

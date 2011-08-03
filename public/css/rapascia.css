@@ -1,3 +1,24 @@
+.players .player[player=red] {
+  background-color: #e8c0c0;
+}
+.players .player[player=green] {
+  background-color: #c0e8c0;
+}
+.players .player[player=blue] {
+  background-color: #c0c0e8;
+}
+.players .player[player=orange] {
+  background-color: #e8e824;
+}
+.players .player[player=magenta] {
+  background-color: #e8c0e8;
+}
+.players .player[player=cyan] {
+  background-color: #c0e8e8;
+}
+.players .player[me=me] {
+  border: solid 2px #f00;
+}
 .game .row {
   overflow: hidden;
 }
