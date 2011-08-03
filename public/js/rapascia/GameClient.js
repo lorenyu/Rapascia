@@ -30,7 +30,16 @@
     };
     
     
-    
+    /**
+     * Underscore plugins
+     */
+    _.mixin({
+        sum: function(list) {
+            return _.reduce(list, function(memo, num) {
+                return memo + num;
+            });
+        }
+    });
     
     
     
@@ -214,9 +223,9 @@ Tile.prototype.units = function(units) {
     _.each(_.difference(this._units, units), function(unit) {
         unit.tile(null);
     });
-    _.each(_.difference(units, this._units), _.bind(function(unit) {
+    _.each(_.difference(units, this._units), function(unit) {
         unit.tile(this);
-    }, this));
+    }, this);
     this._units = units;
 };
 Tile.prototype.addUnits = function(units) {
@@ -255,7 +264,7 @@ var Unit = Rapascia.models.Unit = function(player) {
     Unit._nextId += 1;
     this._player = player;
     this._mode = 'stopped';
-    this._health = 10;
+    this._health = Unit.HEALTH_PER_UNIT;
     this._cooldown = 0;
     this._tile = null;
     
@@ -267,6 +276,7 @@ var Unit = Rapascia.models.Unit = function(player) {
 };
 Unit._nextId = 1;
 Unit._unitsById = {};
+Unit.HEALTH_PER_UNIT = 10;
 Unit.get = function(id) {
     return Unit._unitsById[id];
 };
@@ -292,8 +302,11 @@ Unit.prototype.damage = function() {
     }
     return defaultDamage;
 };
-Unit.prototype.health = function() {
-    return this._health;
+Unit.prototype.health = function(health) {
+    if (health === undefined) {
+        return this._health;
+    }
+    this._health = health;
 };
 Unit.prototype.tile = function(tile) {
     if (tile === undefined) {
@@ -499,8 +512,66 @@ var MoveCommand = Rapascia.commands.Move = function(units, from, to) {
     this.to = to;
 };
 MoveCommand.prototype.execute = function() {
+    
     this.from.removeUnits(this.units);
-    this.to.addUnits(this.units);
+    
+    if (this.from.player() !== this.to.player()) {
+        
+        // attack
+        
+        var attackingUnits = this.units,
+            defendingUnits = this.to.units(),
+            attackingDamage,
+            defendingDamage,
+            damage,
+            attacker,
+            defender;
+        
+        while (attackingUnits.length > 0 && defendingUnits.length > 0) {
+            
+            attackingDamage = _.sum(_.invoke(attackingUnits, 'damage'));
+            defendingDamage = _.sum(_.invoke(defendingUnits, 'damage'));
+            
+            while (attackingDamage > 0 && defendingUnits.length > 0) {
+                
+                defender = defendingUnits[0];
+                damage = Math.min(attackingDamage, defender.health());
+                
+                attackingDamage -= damage;
+                defender.health( defender.health() - damage );
+                
+                if (defender.health() <= 0) {
+                    defendingUnits.shift();
+                }
+            }
+            
+            while (defendingDamage > 0 && attackingUnits.length > 0) {
+                
+                attacker = attackingUnits[0];
+                damage = Math.min(defendingDamage, attacker.health());
+                
+                defendingDamage -= damage;
+                attacker.health( attacker.health() - damage );
+                
+                if (attacker.health() <= 0) {
+                    attackingUnits.shift();
+                }
+            }
+            
+        }
+        
+        // advance remaining units
+        if (defendingUnits.length === 0) {
+            this.to.addUnits(attackingUnits);
+        }
+        
+        // reset health
+        _.invoke(this.to.units(), 'health', Unit.HEALTH_PER_UNIT);
+        _.invoke(this.from.units(), 'health', Unit.HEALTH_PER_UNIT);
+        
+    } else {
+        this.to.addUnits(this.units);
+    }
 };
 MoveCommand.prototype.serialize = function() {
     return {
