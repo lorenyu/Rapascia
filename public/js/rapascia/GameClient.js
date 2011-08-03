@@ -104,12 +104,14 @@ Game.prototype.addPlayer = function(player) {
     }
     
     // add 4 units for the player
-    _.each(_.range(4), function() {
-        startingPosition.units().push(new Unit(player));
-    });
+    startingPosition.addUnits(_.map(_.range(4), function() {
+        return new Unit(player);
+    }));
 };
 // UI methods
-Game.prototype.selectedTile = function(tile) {
+Game.prototype.selectedTile = function() {
+    return this.selectedUnits() && this.selectedUnits().length > 0 && this.selectedUnits()[0].tile();
+    /*
     if (tile === undefined) {
         return this._selectedTile;
     }
@@ -121,6 +123,7 @@ Game.prototype.selectedTile = function(tile) {
         tile.selected(true); // select next tile
     }
     this._selectedTile = tile;
+    */
 };
 Game.prototype.selectingUnits = function(units) {
     if (units === undefined) {
@@ -204,14 +207,23 @@ Tile.prototype.map = function() {
 Tile.prototype.id = function() {
     return this._id;
 };
-Tile.prototype.units = function() {
-    return this._units;
+Tile.prototype.units = function(units) {
+    if (units === undefined) {
+        return this._units;
+    }
+    _.each(_.difference(this._units, units), function(unit) {
+        unit.tile(null);
+    });
+    _.each(_.difference(units, this._units), _.bind(function(unit) {
+        unit.tile(this);
+    }, this));
+    this._units = units;
 };
 Tile.prototype.addUnits = function(units) {
-    this._units = _.union(this.units(), units);
+    this.units(_.union(this.units(), units));
 };
 Tile.prototype.removeUnits = function(units) {
-    this._units = _.difference(this.units(), units);
+    this.units(_.difference(this.units(), units));
 };
 Tile.prototype.player = function() {
     if (this.units().length > 0) {
@@ -222,11 +234,14 @@ Tile.prototype.player = function() {
 Tile.prototype.isAdjacentTo = function(tile) {
     return this.map().isAdjacent(this, tile);
 };
-Tile.prototype.selected = function(selected) {
+Tile.prototype.selected = function() {
+    return this.units().length > 0 && this.units()[0].selected();
+    /*
     if (selected === undefined) {
         return this._selected;
     }
     this._selected = selected;
+    */
 };
 Tile.prototype.toggleSelected = function() {
     this._selected = !this._selected;
@@ -242,6 +257,7 @@ var Unit = Rapascia.models.Unit = function(player) {
     this._mode = 'stopped';
     this._health = 10;
     this._cooldown = 0;
+    this._tile = null;
     
     Unit._unitsById[this._id] = this;
     
@@ -278,6 +294,12 @@ Unit.prototype.damage = function() {
 };
 Unit.prototype.health = function() {
     return this._health;
+};
+Unit.prototype.tile = function(tile) {
+    if (tile === undefined) {
+        return this._tile;
+    }
+    this._tile = tile;
 };
 Unit.prototype.isTransitioning = function() {
     return this._cooldown > 0;
@@ -383,7 +405,7 @@ var GameClient = Rapascia.GameClient = function(socket) {
         
         switch (event.which) {
         case 1: // left mouse button
-            gameClient.game.selectedTile(tile);
+            //gameClient.game.selectedTile(tile);
             break;
         case 2: // middle mouse button
             break;
