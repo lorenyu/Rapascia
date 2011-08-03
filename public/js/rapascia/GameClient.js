@@ -405,6 +405,7 @@ var GameClient = Rapascia.GameClient = function(socket) {
         
         switch (event.which) {
         case 1: // left mouse button
+            gameClient.game.selectedUnits(tile.units());
             //gameClient.game.selectedTile(tile);
             break;
         case 2: // middle mouse button
@@ -414,7 +415,7 @@ var GameClient = Rapascia.GameClient = function(socket) {
                 gameClient.player === gameClient.game.selectedTile().player()) { // if player controls the selected tile
                 
                 // move units
-                console.log('Moving units ' + gameClient.game.selectedUnits() + ' to tile ' + tile.id());
+                //console.log('Moving units ' + gameClient.game.selectedUnits() + ' to tile ' + tile.id());
                 gameClient.sendCommand(new Rapascia.commands.Move(gameClient.game.selectedUnits(), gameClient.game.selectedTile(), tile));
             }
             break;
@@ -436,6 +437,7 @@ var GameClient = Rapascia.GameClient = function(socket) {
             var units = $this.prevAll().andSelf().rapascia('getModel');
             //console.log(units);
             gameClient.game.selectedUnits(units);
+            return false;
         }
     });
     /*
@@ -472,7 +474,7 @@ GameClient.prototype.tick = function(data) {
     this.time = time;
 };
 GameClient.prototype.execute = function(command) {
-    console.log(command);
+    //console.log(command);
     switch (command.name) {
     case 'start-game':
         break;
@@ -490,7 +492,7 @@ GameClient.prototype.sendCommand = function(command) {
  
 Rapascia.commands = {};
 var MoveCommand = Rapascia.commands.Move = function(units, from, to) {
-    console.log(units);
+    //console.log(units);
     this.name = 'move';
     this.units = units;
     this.from = from;
