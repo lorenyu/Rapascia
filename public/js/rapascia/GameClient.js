@@ -264,6 +264,9 @@ Tile.prototype.units = function(units) {
     _.each(_.difference(units, this._units), function(unit) {
         unit.tile(this);
     }, this);
+    if (units.length === 0) {
+        this.mode('stopped');
+    }
     this._units = units;
 };
 Tile.prototype.addUnits = function(units) {
@@ -277,7 +280,6 @@ Tile.prototype.mode = function(mode) {
         return this._mode;
     }
     this._mode = mode;
-    _.invoke(this.units(), 'mode', mode);
 };
 Tile.prototype.player = function() {
     if (this.units().length > 0) {
@@ -309,7 +311,6 @@ var Unit = Rapascia.models.Unit = function(player) {
     Unit._nextId += 1;
     this._time = 0;
     this._player = player;
-    this._mode = 'stopped';
     this._health = Unit.HEALTH_PER_UNIT;
     this._cooldown = 0;
     this._tile = null;
@@ -358,11 +359,11 @@ Unit.prototype.tile = function(tile) {
     }
     this._tile = tile;
 };
-Unit.prototype.mode = function(mode) {
-    if (mode === undefined) {
-        return this._mode;
+Unit.prototype.mode = function() {
+    if (this.tile()) {
+        return this.tile().mode();
     }
-    this._mode = mode;
+    return 'moving';
 };
 Unit.prototype.isTransitioning = function() {
     return this._cooldown > 0;
@@ -393,6 +394,7 @@ var Player = Rapascia.models.Player = function(name, isMe) {
     this._index = Player.nextIndex();
     this._name = name;
     this._isMe = isMe;
+    this._energy = 3;
 };
 Player.prototype.name = function() {
     return this._name;
@@ -420,6 +422,12 @@ Player.prototype.color = function() {
     case 6: return 'cyan';
     }
     return 'gray';
+};
+Player.prototype.energy = function(energy) {
+    if (energy === undefined) {
+        return this._energy;
+    }
+    this._energy = energy;
 };
 
 /*************
@@ -450,6 +458,7 @@ var GameClient = Rapascia.GameClient = function(socket) {
     this.game = new Rapascia.models.Game();
     this.socket = socket;
     
+    socket.once('game-start', _.bind(this.onGameStart, this));
     socket.on('tick', _.bind(this.tick, this));
     socket.on('player-joined', _.bind(function(playerData) {
         
@@ -543,14 +552,25 @@ var GameClient = Rapascia.GameClient = function(socket) {
         socket.emit(action);
     });
 };
+GameClient.prototype.onGameStart = function(data) {
+    this.time = data.time;
+};
 GameClient.prototype.tick = function(data) {
     $('.time').text(data.time); // for debugging
     
     var commands = data.commands,
         time = data.time,
-        timeElapsed;
+        timeElapsed,
+        energyPerMillisecond = 0.3 / 1000,
+        energyGained;
     
-    timeElapsed = time - this.time;    
+
+    timeElapsed = time - this.time;
+    energyGained = timeElapsed * energyPerMillisecond;
+    
+    _.each(this.game.players(), function(player) {
+        player.energy(player.energy() + energyGained);
+    });
     
     // process player commands
     _.each(commands, _.bind(this.execute, this));
