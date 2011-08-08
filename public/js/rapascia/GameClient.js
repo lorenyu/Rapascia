@@ -102,6 +102,8 @@ Game.prototype.addPlayer = function(player) {
     var startingPosition;
     
     this.players().push(player);
+    
+    /*
     switch (player.index()) {
         case 1:
             startingPosition = this.map().tiles()[0][0];
@@ -121,6 +123,7 @@ Game.prototype.addPlayer = function(player) {
     startingPosition.addUnits(_.map(_.range(4), function() {
         return new Unit(player);
     }));
+    */
 };
 // UI methods
 Game.prototype.selectedTile = function() {
@@ -173,12 +176,16 @@ var Map = Rapascia.models.Map = function() {
     
     this._time = 0;
 
+};
+Map.prototype.load = function(players) {
+    
     // hardcode map for now
-    var numRows = this.numRows = 9,
-        numCols = this.numCols = 9,
+    var numRows = this.numRows = 8,
+        numCols = this.numCols = 8,
         tiles = this._tiles = [], tile,
-        i,
-        j;
+        i, j,
+        player,
+        units;
     for (i = 0; i < numRows; i += 1) {
         tiles.push([]);
         for (j = 0; j < numCols; j += 1) {
@@ -187,6 +194,47 @@ var Map = Rapascia.models.Map = function() {
             tile.i = i;
             tile.j = j;
             tiles[i].push(tile);
+            
+            switch (i % 4) {
+            case 0:
+                switch (j % 4) {
+                case 0: player = players[0]; break;
+                case 1: player = players[2]; break;
+                case 2: player = players[3]; break;
+                case 3: player = players[1]; break;
+                }
+                break;
+            case 1:
+                switch (j % 4) {
+                case 0: player = players[2]; break;
+                case 1: player = players[2]; break;
+                case 2: player = players[3]; break;
+                case 3: player = players[3]; break;
+                }
+                break;
+            case 2:
+                switch (j % 4) {
+                case 0: player = players[1]; break;
+                case 1: player = players[1]; break;
+                case 2: player = players[0]; break;
+                case 3: player = players[0]; break;
+                }
+                break;
+            case 3:
+                switch (j % 4) {
+                case 0: player = players[3]; break;
+                case 1: player = players[1]; break;
+                case 2: player = players[0]; break;
+                case 3: player = players[2]; break;
+                }
+                break;
+            }
+            
+            if (player) {
+                tile.addUnits(_.map(_.range(3), function() {
+                    return new Unit(player);
+                }));
+            }
         }
     }
 };
@@ -554,6 +602,8 @@ var GameClient = Rapascia.GameClient = function(socket) {
 };
 GameClient.prototype.onGameStart = function(data) {
     this.time = data.time;
+    
+    this.game.map().load(this.game.players());
 };
 GameClient.prototype.tick = function(data) {
     $('.time').text(data.time); // for debugging
@@ -561,7 +611,7 @@ GameClient.prototype.tick = function(data) {
     var commands = data.commands,
         time = data.time,
         timeElapsed,
-        energyPerMillisecond = 0.3 / 1000,
+        energyPerMillisecond = 0.9 / 1000,
         energyGained;
     
 
@@ -617,6 +667,12 @@ var MoveCommand = Rapascia.commands.Move = function(units, from, to) {
     this.to = to;
 };
 MoveCommand.prototype.execute = function() {
+    
+    var player = this.from.player();
+    if (player.energy() < 3) {
+        return;
+    }
+    player.energy(player.energy() - 3);
     
     this.from.removeUnits(this.units);
     
@@ -706,6 +762,12 @@ var ProduceCommand = Rapascia.commands.Produce = function(tile) {
     this.tile = tile;
 };
 ProduceCommand.prototype.execute = function() {
+    
+    var player = this.tile.player();
+    if (player.energy() < 3) {
+        return;
+    }
+    player.energy(player.energy() - 3);
 
     this.tile.mode('producing');
 
@@ -730,6 +792,12 @@ var DefendCommand = Rapascia.commands.Defend = function(tile) {
     this.tile = tile;
 };
 DefendCommand.prototype.execute = function() {
+    
+    var player = this.tile.player();
+    if (player.energy() < 3) {
+        return;
+    }
+    player.energy(player.energy() - 3);
 
     this.tile.mode('defending');
 
