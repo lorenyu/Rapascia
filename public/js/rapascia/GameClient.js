@@ -275,12 +275,29 @@ Tile._tilesById = {};
 Tile.get = function(id) {
     return Tile._tilesById[id];
 };
+Tile.PRODUCTION_PER_TILE = 20;
 Tile.prototype.tick = function(time) {
     var timeElapsed = time - this._time,
+        productionPerSecond,
         numUnitsProduced,
+        numUnits = this.units().length,
         player = this.player();
     if (this.mode() == 'producing') {
-        this._productionAmount += (timeElapsed / 1000) * this.units().length * Unit.PRODUCTION_PER_UNIT;
+        if (numUnits <= 5) {
+            productionPerSecond = Tile.PRODUCTION_PER_TILE + numUnits * Unit.PRODUCTION_PER_UNIT;
+        } else if (numUnits <= 10) {
+            productionPerSecond = Tile.PRODUCTION_PER_TILE + (5 + 0.8 * (numUnits - 5)) * Unit.PRODUCTION_PER_UNIT;
+        } else if (numUnits <= 15) {
+            productionPerSecond = Tile.PRODUCTION_PER_TILE + (9 + 0.6 * (numUnits - 10)) * Unit.PRODUCTION_PER_UNIT;
+        } else if (numUnits <= 20) {
+            productionPerSecond = Tile.PRODUCTION_PER_TILE + (12 + 0.4 * (numUnits - 15)) * Unit.PRODUCTION_PER_UNIT;
+        } else if (numUnits <= 25) {
+            productionPerSecond = Tile.PRODUCTION_PER_TILE + (14 + 0.2 * (numUnits - 20)) * Unit.PRODUCTION_PER_UNIT;
+        } else {
+            productionPerSecond = Tile.PRODUCTION_PER_TILE + 15 * Unit.PRODUCTION_PER_UNIT;
+        }
+        
+        this._productionAmount += (timeElapsed / 1000) * productionPerSecond;
         
         numUnitsProduced = Math.floor(this._productionAmount / Unit.COST_PER_UNIT);
         this._productionAmount = this._productionAmount % Unit.COST_PER_UNIT;
@@ -390,7 +407,7 @@ Unit.prototype.damage = function() {
     var defaultDamage = 4;
     
     switch (this.mode()) {
-    case 'defending': return 1.30 * defaultDamage;
+    case 'defending': return 1.50 * defaultDamage;
     case 'producing': return 0.35 * defaultDamage;
     }
     return defaultDamage;
