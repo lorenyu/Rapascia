@@ -3,7 +3,7 @@
 
 placeholder(define='script'):
     script
-        $(document).ready(function() {
+        head.ready(function() {
             var socket = io.connect('/rapascia' + window.location.pathname);
             window.gameClient = new Rapascia.GameClient(socket);
 

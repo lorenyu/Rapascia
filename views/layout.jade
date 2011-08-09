@@ -2,14 +2,23 @@
 html
     head
         link(type="text/css", rel="stylesheet", href="/css/rapascia.css")
+        script(type="text/javascript", src="/js/lib/head.min.js")
+        script
+            head.js("/js/lib/jade.min.js",
+                    "/js/lib/underscore-min.js",
+                    "/js/lib/jquery-1.4.3.js",
+                    "http://cdn.jquerytools.org/1.2.5/tiny/jquery.tools.min.js",
+                    "/js/lib/processing-1.2.3.js",
+                    "/socket.io/socket.io.js",
+                    "/js/rapascia/rapascia.js");
         script(type="text/javascript", src="/js/lib/jade.min.js")
         script(type="text/javascript", src="/js/lib/underscore-min.js")
         script(type="text/javascript", src="/js/lib/jquery-1.4.3.js")
         // UI Tools: Tabs, Tooltip, Scrollable and Overlay (4.05 Kb)
         script(type="text/javascript", src="http://cdn.jquerytools.org/1.2.5/tiny/jquery.tools.min.js")
         script(type="text/javascript", src="/js/lib/processing-1.2.3.js")
-        script(type="text/javascript", src="/js/rapascia/GameClient.js")
         script(type="text/javascript", src="/socket.io/socket.io.js")
+        script(type="text/javascript", src="/js/rapascia/rapascia.js")
     body.outer-container.title-page
         hgroup.title
             h1 #{placeholder('title')}

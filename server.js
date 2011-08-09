@@ -1,7 +1,9 @@
-var util = require('util'),
+var _ = require('underscore'),
+    util = require('util'),
     http = require('http'),
     path = require('path'),
     io = require('socket.io'),
+    fs = require('fs'),
     express = require('express'),
     jade = require('jade'),
     placeholder = require('placeholder'),
@@ -53,6 +55,10 @@ app.get('/', function(req, res, next){
     });
 });
 
+app.get('/tests', function(req, res, next){
+    res.render('tests');
+});
+
 app.get('/game', function(req, res, next){
     res.render('game');
 });
@@ -63,6 +69,54 @@ app.get('/game/:gameid', loadGame, function(req, res, next){
     });
 });
 
+app.get('/js/rapascia/rapascia.js', function(req, res, next) {
+    var files = [],
+        directories = ['util/', '', 'models/', 'views/', 'commands/'], // these directories are in the order in which they should be included
+        directoriesToRead,
+        fileContents = {};
+
+
+    directoriesToRead = directories.length;
+    var dirDone = function() {
+        directoriesToRead -= 1;
+        if (directoriesToRead <= 0) {
+            var data = _.map(directories, function(dir) { // map through directories in the order specified by the 'directories' array
+                return fileContents[dir].join('\n');
+            }).join('\n');
+            
+            data = 'window.Rapascia = {};\n' + data;
+            res.contentType('js');
+            res.send(data);
+        }
+    };
+    
+    _.each(directories, function(dir) {
+        var dirpath = __dirname + '/game/client/' + dir;
+        fs.readdir(dirpath, function(err, files) {
+            if (err) throw err;
+            
+            fileContents[dir] = [];
+            
+            var filesToRead = files.length;
+            var fileDone = function() {
+                filesToRead -= 1;
+                if (filesToRead <= 0) {
+                    dirDone();
+                }
+            };
+            
+            _.each(files, function(filename) {
+                var filepath = dirpath + filename;
+                fs.readFile(filepath, function(err, data) {
+                    fileContents[dir].push(data);
+                    fileDone();
+                });
+            });
+        });
+    });
+});
+
+// unused
 app.get('/static/game/:filename', function(req, res, next){
     var filepath;
     if (['GameKernel.js'].indexOf(req.params.filename) !== -1) {

@@ -1,0 +1,18 @@
+#{placeholder.define('title', 'Test Runner')}
+#{placeholder.define('subtitle', 'Jasmine Spec Runner')}
+
+placeholder(define='script'):
+    link(rel="stylesheet", type="text/css", href="/tests/lib/jasmine-1.0.2/jasmine.css")
+    script(type="text/javascript", src="/tests/lib/jasmine-1.0.2/jasmine.js")
+    script(type="text/javascript", src="/tests/lib/jasmine-1.0.2/jasmine-html.js")
+
+    script(type="text/javascript", src="/tests/spec/GameClientSpec.js")
+    script(type="text/javascript", src="/tests/spec/utilSpec.js")
+    script
+        head.ready(function() {
+            
+            jasmine.getEnv().addReporter(new jasmine.TrivialReporter());
+            jasmine.getEnv().execute();
+            
+        });
+
