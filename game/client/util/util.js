@@ -99,6 +99,29 @@ util.addProperty = function(cls, property) {
     };
 };
 
+var math = util.math = {};
+
+
+math.stepwiseConstant = function(steps, constants) {
+    return function(n) {
+        
+    };
+};
+
+/**
+ * generates and returns a function f, such that f(x) = mx + b.
+ * 
+ * Usage:
+ *   var f = math.slopeIntercept(2,3);
+ *   assert(f(0) == 3);
+ *   assert(f(1) == 5);
+ */
+math.slopeIntercept = function(m, b) {
+    return function(x) {
+        return m*x + b;
+    };
+};
+
 
 /**
  * Underscore plugins

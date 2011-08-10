@@ -39,4 +39,16 @@ describe('client.util module', function(){
             expect(foo.prop()).toBe('y');
         });
     });
+    
+    describe('util.math.slopeIntercept', function(m, b) {
+        var f;
+        it('should correctly model the function f(x) = mx + b', function() {
+            var m = -0.2,
+                b = 1;
+            f = util.math.slopeIntercept(-0.2, 1); // f(x) = -0.2x + 1
+            expect(f(0)).toBe(1);
+            expect(f(2)).toBe(0.6);
+            expect(f(-2)).toBe(1.4);
+        });
+    });
 });
