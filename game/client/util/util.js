@@ -50,9 +50,8 @@ Rapascia.require = function(cls, callback) {
         $(Rapascia).one('class-defined:' + cls, function() {
             node = Rapascia;
             _.each(parts, function(part) {
-                node[part] = node[part] || {};
                 node = node[part];
-            })
+            });
             callback(node);
         });
     }
@@ -71,10 +70,33 @@ Rapascia.define = function(cls, definition) {
     _.each(parts, function(part) {
         node[part] = node[part] || {};
         node = node[part];
-    })
+    });
     node[last] = definition;
     $(Rapascia).trigger('class-defined:' + cls);
     return definition;
+};
+
+/**
+ * Convenience method for adding getters/setters to classes.
+ * NOTE: This method uses closures so it is less efficient than defining the property explicitly
+ * 
+ * Usage:
+ *   var Person = function() {
+ *       this._age = 50;
+ *   };
+ *   util.addProperty(Person, 'age');
+ * 
+ *   var person = new Person();
+ *   person.age(60); // set age
+ *   assert(person.age() == 60); // get age
+ */
+util.addProperty = function(cls, property) {
+    cls.prototype[property] = function(value) {
+        if (value === undefined) {
+            return this['_' + property];
+        }
+        this['_' + property] = value;
+    };
 };
 
 
