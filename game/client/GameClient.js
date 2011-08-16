@@ -6,6 +6,8 @@ var util = Rapascia.util;
  * Renderers *
  *************/
  
+// TODO: move renderers out of this file.
+ 
 var jade = require('jade');
 
 Rapascia.renderers = {};
