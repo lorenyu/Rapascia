@@ -6,13 +6,25 @@ placeholder(define='script'):
     script(type="text/javascript", src="/tests/lib/jasmine-1.0.2/jasmine.js")
     script(type="text/javascript", src="/tests/lib/jasmine-1.0.2/jasmine-html.js")
 
-    script(type="text/javascript", src="/tests/spec/GameClientSpec.js")
+    script(type="text/javascript", src="/js/lib/jquery-1.4.3.js")
+    script(type="text/javascript", src="/js/lib/jade.min.js")
+    script(type="text/javascript", src="/js/lib/underscore-min.js")
+    script(type="text/javascript", src="/js/lib/jquery-1.4.3.js")
+    // UI Tools: Tabs, Tooltip, Scrollable and Overlay (4.05 Kb)
+    script(type="text/javascript", src="http://cdn.jquerytools.org/1.2.5/tiny/jquery.tools.min.js")
+    script(type="text/javascript", src="/js/lib/processing-1.2.3.js")
+    script(type="text/javascript", src="/socket.io/socket.io.js")
+    script(type="text/javascript", src="/js/rapascia/rapascia.js")
+
     script(type="text/javascript", src="/tests/spec/utilSpec.js")
+    script(type="text/javascript", src="/tests/spec/models/TimeSpec.js")
+    script(type="text/javascript", src="/tests/spec/models/TimerSpec.js")
+    script(type="text/javascript", src="/tests/spec/models/TurnSpec.js")
     script
         head.ready(function() {
-            
-            jasmine.getEnv().addReporter(new jasmine.TrivialReporter());
-            jasmine.getEnv().execute();
-            
+                
+                jasmine.getEnv().addReporter(new jasmine.TrivialReporter());
+                jasmine.getEnv().execute();
+                
         });
 
