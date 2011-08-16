@@ -23,10 +23,12 @@ Rapascia.renderers.playerRenderer = jade.compile('li.player(name=this.name(), pl
 
 var MoveCommand,
     DefendCommand,
-    ProduceCommand;
+    ProduceCommand,
+    Time;
 Rapascia.require('Rapascia.commands.Move', function(Move) { MoveCommand = Move; });
 Rapascia.require('Rapascia.commands.Defend', function(Defend) { DefendCommand = Defend; });
 Rapascia.require('Rapascia.commands.Produce', function(Produce) { ProduceCommand = Produce; });
+Rapascia.require('Rapascia.models.Time', function(cls) { Time = cls; });
 
 /**************
  * GameClient *
@@ -34,7 +36,8 @@ Rapascia.require('Rapascia.commands.Produce', function(Produce) { ProduceCommand
 var GameClient = Rapascia.GameClient = function(socket) {
     
     this.player = null;
-    this.game = new Rapascia.models.Game();
+    this.time = new Time();
+    this.game = new Rapascia.models.Game(this.time);
     this.socket = socket;
     
     socket.once('game-start', _.bind(this.onGameStart, this));
@@ -97,7 +100,9 @@ var GameClient = Rapascia.GameClient = function(socket) {
             $this = $(this);
             var units = $this.prevAll().andSelf().rapascia('getModel');
             //console.log(units);
-            gameClient.game.selectedUnits(units);
+            if (gameClient.game.activePlayer().isMe()) {
+                gameClient.game.selectedUnits(units);
+            }
             return false;
         }
     });
@@ -106,7 +111,9 @@ var GameClient = Rapascia.GameClient = function(socket) {
         'mousedown': function(event) {
             var $this = $(this),
                 tile = $this.parents('.tile').rapascia('getModel')[0];
-            gameClient.sendCommand(new Rapascia.commands.Produce(tile));
+            if (gameClient.game.activePlayer().isMe()) {
+                gameClient.sendCommand(new Rapascia.commands.Produce(tile));
+            }
         }
     });
     
@@ -114,7 +121,9 @@ var GameClient = Rapascia.GameClient = function(socket) {
         'mousedown': function(event) {
             var $this = $(this),
                 tile = $this.parents('.tile').rapascia('getModel')[0];
-            gameClient.sendCommand(new Rapascia.commands.Defend(tile));
+            if (gameClient.game.activePlayer().isMe()) {
+                gameClient.sendCommand(new Rapascia.commands.Defend(tile));
+            }
         }
     });
     
@@ -132,8 +141,9 @@ var GameClient = Rapascia.GameClient = function(socket) {
     });
 };
 GameClient.prototype.onGameStart = function(data) {
-    this.time = data.time;
+    this.time.millis(data.time);
     
+    this.game.start();
     this.game.map().load(this.game.players());
 };
 GameClient.prototype.tick = function(data) {
@@ -141,17 +151,7 @@ GameClient.prototype.tick = function(data) {
     
     var commands = data.commands,
         time = data.time,
-        timeElapsed,
-        energyPerMillisecond = 0.9 / 1000,
-        energyGained;
-    
-
-    timeElapsed = time - this.time;
-    energyGained = timeElapsed * energyPerMillisecond;
-    
-    _.each(this.game.players(), function(player) {
-        player.energy(player.energy() + energyGained);
-    });
+        timeElapsed;
     
     // process player commands
     _.each(commands, _.bind(this.execute, this));
@@ -162,7 +162,7 @@ GameClient.prototype.tick = function(data) {
     // render
     $('.game').html(Rapascia.renderers.gameRenderer.call(this.game));
     
-    this.time = time;
+    this.time.millis(time);
 };
 GameClient.prototype.execute = function(command) {
     //console.log(command);

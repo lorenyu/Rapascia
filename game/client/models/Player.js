@@ -10,12 +10,26 @@ var Player = Rapascia.define('Rapascia.models.Player', function(name, isMe) {
     this._name = name;
     this._isMe = isMe;
     this._energy = 3;
+    this._game = null;
 });
+Player.prototype.tick = function(time) {
+    
+};
 Player.prototype.name = function() {
     return this._name;
 };
 Player.prototype.isMe = function() {
     return this._isMe;
+};
+Player.prototype.isActive = function() {
+    return this.game() && (this.game().turn().player() === this);
+};
+Player.prototype.game = function(game) {
+    if (game === undefined) {
+        return this._game;
+    }
+    this._game = game;
+    return this;
 };
 Player.nextIndex = (function() {
     var index = 1;

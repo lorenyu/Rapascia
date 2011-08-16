@@ -2,13 +2,20 @@
     
 var util = Rapascia.util;
 
+var Turn;
+Rapascia.require('Rapascia.models.Turn', function(cls) { Turn = cls; });
+
 /**
  * Game Model
  */
-var Game = Rapascia.define('Rapascia.models.Game', function() {
+var Game = Rapascia.define('Rapascia.models.Game', function(time) {
     this._players = [];
     this._map = new Rapascia.models.Map();
-    this._time = 0;
+    this._time = time;
+    this._activePlayer = null;
+    this._turn = new Turn(this.time());
+    
+    $(this.turn()).bind('turn-ended', _.bind(this.onTurnEnded, this));
     
     // UI properties
     this._selectedTile = null;
@@ -17,7 +24,12 @@ var Game = Rapascia.define('Rapascia.models.Game', function() {
 });
 Game.prototype.tick = function(time) {
     this._time = time;
+    this.turn().tick(time);
     this.map().tick(time);
+    _.invoke(this.players(), 'tick', time);
+};
+Game.prototype.time = function() {
+    return this._time;
 };
 Game.prototype.players = function() {
     return this._players;
@@ -29,6 +41,7 @@ Game.prototype.addPlayer = function(player) {
     var startingPosition;
     
     this.players().push(player);
+    player.game(this);
     
     /*
     switch (player.index()) {
@@ -51,6 +64,29 @@ Game.prototype.addPlayer = function(player) {
         return new Unit(player);
     }));
     */
+};
+Game.prototype.start = function() {
+    if (this.players().length > 0) {
+        this.turn().player(this.players()[0]);
+        this.turn().start();
+    }
+};
+Game.prototype.turn = function() {
+    return this._turn;
+};
+/**
+ * returns the player whose turn it is after the current player's turn
+ */
+Game.prototype.nextPlayer = function() {
+    if (this.players().length === 0) {
+        return null;
+    }
+    var playerIndex = this.players().indexOf(this.turn().player());
+    return this.players()[(playerIndex + 1) % this.players().length];
+};
+Game.prototype.onTurnEnded = function() {
+    this.turn().player(this.nextPlayer());
+    this.turn().start();
 };
 // UI methods
 Game.prototype.selectedTile = function() {
