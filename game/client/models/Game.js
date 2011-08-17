@@ -12,7 +12,6 @@ var Game = Rapascia.define('Rapascia.models.Game', function(time) {
     this._players = [];
     this._map = new Rapascia.models.Map();
     this._time = time;
-    this._activePlayer = null;
     this._turn = new Turn(this.time());
     
     $(this.turn()).bind('turn-ended', _.bind(this.onTurnEnded, this));

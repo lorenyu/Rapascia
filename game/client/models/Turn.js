@@ -9,8 +9,10 @@ var Turn = Rapascia.define('Rapascia.models.Turn', function(time) {
     this._player = null;
     this._timer = new Rapascia.models.Timer(time);
 });
-Turn.SECONDS_PER_TURN = 3;
+Turn.SECONDS_PER_TURN = 10;
+Turn.ENERGY_PER_TURN = 3;
 Turn.prototype.start = function() {
+    this.player().energy(this.player().energy() + Turn.ENERGY_PER_TURN);
     this._timer.start();
 };
 Turn.prototype.tick = function(time) {

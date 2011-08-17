@@ -77,12 +77,14 @@ var GameClient = Rapascia.GameClient = function(socket) {
         case 2: // middle mouse button
             break;
         case 3: // right mouse button
-            if (gameClient.game.selectedTile().isAdjacentTo(tile) &&
-                gameClient.player === gameClient.game.selectedTile().player()) { // if player controls the selected tile
-                
-                // move units
-                //console.log('Moving units ' + gameClient.game.selectedUnits() + ' to tile ' + tile.id());
-                gameClient.sendCommand(new Rapascia.commands.Move(gameClient.game.selectedUnits(), gameClient.game.selectedTile(), tile));
+            if (gameClient.game.turn().player().isMe()) {
+                if (gameClient.game.selectedTile().isAdjacentTo(tile) &&
+                    gameClient.player === gameClient.game.selectedTile().player()) { // if player controls the selected tile
+                    
+                    // move units
+                    //console.log('Moving units ' + gameClient.game.selectedUnits() + ' to tile ' + tile.id());
+                    gameClient.sendCommand(new Rapascia.commands.Move(gameClient.game.selectedUnits(), gameClient.game.selectedTile(), tile));
+                }
             }
             break;
         }
@@ -102,9 +104,7 @@ var GameClient = Rapascia.GameClient = function(socket) {
             $this = $(this);
             var units = $this.prevAll().andSelf().rapascia('getModel');
             //console.log(units);
-            if (gameClient.game.activePlayer().isMe()) {
-                gameClient.game.selectedUnits(units);
-            }
+            gameClient.game.selectedUnits(units);
             return false;
         }
     });
@@ -113,7 +113,7 @@ var GameClient = Rapascia.GameClient = function(socket) {
         'mousedown': function(event) {
             var $this = $(this),
                 tile = $this.parents('.tile').rapascia('getModel')[0];
-            if (gameClient.game.activePlayer().isMe()) {
+            if (gameClient.game.turn().player().isMe()) {
                 gameClient.sendCommand(new Rapascia.commands.Produce(tile));
             }
         }
@@ -123,7 +123,7 @@ var GameClient = Rapascia.GameClient = function(socket) {
         'mousedown': function(event) {
             var $this = $(this),
                 tile = $this.parents('.tile').rapascia('getModel')[0];
-            if (gameClient.game.activePlayer().isMe()) {
+            if (gameClient.game.turn().player().isMe()) {
                 gameClient.sendCommand(new Rapascia.commands.Defend(tile));
             }
         }
