@@ -16,16 +16,14 @@
     &nth-of-type(5n) { clear: left; }
 }
 
-.players {
-    .player {
-        &[player=red] { background-color: @red; }
-        &[player=green] { background-color: @green; }
-        &[player=blue] { background-color: @blue; }
-        &[player=orange] { background-color: @orange; }
-        &[player=magenta] { background-color: @magenta; }
-        &[player=cyan] { background-color: @cyan; }
-        &[me=me] { border: solid 2px #f00; }
-    }
+.player {
+    &[player=red] { background-color: @red; }
+    &[player=green] { background-color: @green; }
+    &[player=blue] { background-color: @blue; }
+    &[player=orange] { background-color: @orange; }
+    &[player=magenta] { background-color: @magenta; }
+    &[player=cyan] { background-color: @cyan; }
+    &[me=me] { border: solid 2px #f00; }
 }
 
 .game {

@@ -1,6 +1,6 @@
 - var activePlayer = this.turn().player();
 .active-player Active Player: 
-    = activePlayer.name()
+    .player(name=activePlayer.name(), player=activePlayer.color(), me=activePlayer.isMe())= activePlayer.name()
 .time-left Time Left in Turn:
     = Math.ceil(this.turn().timeLeft() / 1000)
 .energy Energy 
